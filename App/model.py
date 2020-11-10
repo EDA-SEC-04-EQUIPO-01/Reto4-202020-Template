@@ -57,7 +57,8 @@ def newAnalyzer():
                     'stops': None,
                     'connections': None,
                     'components': None,
-                    'paths': None
+                    'paths': None,
+                    'graph':None
                     }
 
         analyzer['stops'] = m.newMap(numelements=14000,
@@ -69,14 +70,6 @@ def newAnalyzer():
                                               size=14000,
                                               comparefunction=compareStopIds)
 
-        citibike = {
-                    'graph': None
-                    }
-
-        citibike['graph'] = gr.newGraph(datastructure='ADJ_LIST',
-                                     directed=True,
-                                     size=1000,
-                                     comparefunction=compareStations)
 
         return analyzer
     except Exception as exp:
@@ -98,17 +91,17 @@ def addStation(citibike, stationid):
     Adiciona una estación como un vertice del grafo
     """
     #Para el reto calcular prom de tiempo entre los vertices y guardarlos.
-    if not gr.containsVertex(citibike ['graph'], stationid):
-            gr.insertVertex(citibike ['graph'], stationid)
+    if not gr.containsVertex(citibike['connections'], stationid):
+        gr.insertVertex(citibike['connections'], stationid)
     return citibike
 
 def addConnection(citibike, origin, destination, duration):
     """
     Adiciona un arco entre dos estaciones
     """
-    edge = gr.getEdge(citibike [graph], origin, destination)
+    edge = gr.getEdge(citibike ["connections"], origin, destination)
     if edge is None:
-        gr.addEdge(analyzer[graph], origin, destination, duration)
+        gr.addEdge(citibike["connections"], origin, destination, duration)
     return citibike
 
 
@@ -194,14 +187,7 @@ def addRouteConnections(analyzer):
             prevrout = route
 
 
-def addConnection(analyzer, origin, destination, distance):
-    """
-    Adiciona un arco entre dos estaciones
-    """
-    edge = gr.getEdge(analyzer['connections'], origin, destination)
-    if edge is None:
-        gr.addEdge(analyzer['connections'], origin, destination, distance)
-    return analyzer
+#
 
 # ==============================
 # Funciones de consulta

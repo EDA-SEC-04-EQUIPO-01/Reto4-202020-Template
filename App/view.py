@@ -68,7 +68,7 @@ def printMenu():
 def optionTwo():
     print("\nCargando información de transporte de singapur ....")
     controller.loadTrips(cont) #No es cont pero no se que poner :c
-    controller.loadFile(cont, tripfile) #No es cont y no creo que tripfile exista :c
+    #controller.loadFile(cont, tripfile) #No es cont y no creo que tripfile exista :c
     numedges = controller.totalConnections(cont)
     numvertex = controller.totalStops(cont)
     print('Numero de vertices: ' + str(numvertex))
