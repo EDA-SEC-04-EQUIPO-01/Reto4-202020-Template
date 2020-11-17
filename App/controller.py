@@ -94,6 +94,13 @@ def totalConnections(analyzer):
     """
     return model.totalConnections(analyzer)
 
+def totalTrips(analyzer):
+    """
+    Total viajes entre las paradas
+    """
+    return model.totalTrips(analyzer)
+
+
 
 def clusteredStations(analyzer, id1, id2):
     return model.clusteredStations(analyzer, id1, id2)
@@ -127,3 +134,4 @@ def servedRoutes(analyzer):
     """
     maxvert, maxdeg = model.servedRoutes(analyzer)
     return maxvert, maxdeg
+    

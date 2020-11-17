@@ -98,7 +98,7 @@ def addConnection(citibike, origin, destination, duration):
     """
     Adiciona un arco entre dos estaciones
     """
-    edge = gr.getEdge(citibike ["connections"], origin, destination)
+    edge = gr.getEdge(citibike["connections"], origin, destination)
     if edge is None:
         gr.addEdge(citibike["connections"], origin, destination, duration)
     return citibike
@@ -165,6 +165,22 @@ def totalConnections(analyzer):
     Retorna el total arcos del grafo
     """
     return gr.numEdges(analyzer['connections'])
+
+def totalTrips(analyzer):
+    master = analyzer["connections"]
+    vertex = gr.vertices(master)
+    iterator = it.newIterator(vertex)
+    trips = []
+    while it.hasNext(iterator):
+        element = it.next(iterator)
+        adjacents = gr.adjacents(master,element)
+        iterator2 = it.newIterator(adjacents)
+        while it.hasNext(iterator2) and element != None:
+            element2 = it.next(iterator2)
+            pair = (element,element2)
+            if pair not in trips and (element2,element) not in trips:
+                trips.append(pair)
+    return len(trips)
 
 
 def servedRoutes(analyzer):
@@ -250,3 +266,4 @@ def compareroutes(route1, route2):
         return 1
     else:
         return -1
+        
