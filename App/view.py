@@ -56,7 +56,7 @@ def printMenu():
     print("Bienvenido")
     print("1- Inicializar Analizador")
     print("2- Cargar información de buses de singapur")
-    print("3- Calcular componentes conectados")
+    print("3- Calcular la cantidad de clusters de viajes")
     print("4- Establecer estación base:")
     print("5- Hay camino entre estacion base y estación: ")
     print("6- Ruta de costo mínimo desde la estación base y estación: ")
@@ -67,7 +67,9 @@ def printMenu():
 
 def optionTwo():
     print("\nCargando información de transporte de singapur ....")
-    controller.loadTrips(cont) 
+
+    controller.loadTrips(cont)
+
     numedges = controller.totalConnections(cont)
     numvertex = controller.totalStops(cont)
     numtrips = controller.totalTrips(cont)
@@ -80,8 +82,16 @@ def optionTwo():
 
 
 def optionThree():
-    print('El número de componentes conectados es: ' +
-          str(controller.connectedComponents(cont)))
+    id1 = input("Introduzca una estación: ")
+    id2 = input("Introduzca la otra estación para saber si pertenecen al mismo cluster: ")
+    clustered = controller.clusteredStations(cont, id1, id2)
+    print('El número clusters en el grafo es: ' + str(clustered[0]))
+    if clustered[1]==True:
+        print("Las estaciones", id1, "y", id2, "pertenecen al mismo cluster.")
+    elif clustered[1]=="":
+        print("Alguna de las estaciones no existe en nuestra base de datos.")
+    else:
+        print("Las estaciones no pertenecen al mismo cluster")
 
 
 def optionFour():
