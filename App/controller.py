@@ -56,12 +56,13 @@ def init():
 #  de datos en los modelos
 # ___________________________________________________
 
-def loadTrips(analyzer):
+def loadTrips(citibike):
     for filename in os.listdir(cf.data_dir):
         if filename.endswith('.csv'):
             print('Cargando archivo: ' + filename)
-            loadFile(analyzer, filename)
-    return analyzer
+            loadFile(citibike, filename)
+    model.addComponents(citibike)
+    return citibike
 
 def loadFile(citibike, tripfile):
     """
@@ -73,29 +74,7 @@ def loadFile(citibike, tripfile):
         model.addTrip(citibike, trip)
     return citibike
 
-#Codigo del lab 11 que entiendo no es necesario en este lab (BORRAR ESTA LINEA)
-"""def loadServices(analyzer, servicesfile):
-    
-    Carga los datos de los archivos CSV en el modelo.
-    Se crea un arco entre cada par de estaciones que
-    pertenecen al mismo servicio y van en el mismo sentido.
 
-    addRouteConnection crea conexiones entre diferentes rutas
-    servidas en una misma estación.
-    
-    servicesfile = cf.data_dir + servicesfile
-    input_file = csv.DictReader(open(servicesfile, encoding="utf-8"),
-                                delimiter=",")
-    lastservice = None
-    for service in input_file:
-        if lastservice is not None:
-            sameservice = lastservice['ServiceNo'] == service['ServiceNo']
-            samedirection = lastservice['Direction'] == service['Direction']
-            if sameservice and samedirection:
-                model.addStopConnection(analyzer, lastservice, service)
-        lastservice = service
-    model.addRouteConnections(analyzer)
-    return analyzer"""
 
 # ___________________________________________________
 #  Funciones para consultas
@@ -116,11 +95,8 @@ def totalConnections(analyzer):
     return model.totalConnections(analyzer)
 
 
-def connectedComponents(analyzer):
-    """
-    Numero de componentes fuertemente conectados
-    """
-    return model.connectedComponents(analyzer)
+def clusteredStations(analyzer, id1, id2):
+    return model.clusteredStations(analyzer, id1, id2)
 
 
 def minimumCostPaths(analyzer, initialStation):
