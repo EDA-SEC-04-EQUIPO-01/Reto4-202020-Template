@@ -64,8 +64,7 @@ def loadTrips(analyzer):
     return analyzer
 
 def loadFile(citibike, tripfile):
-    """
-    """
+
     tripfile = cf.data_dir + tripfile
     input_file = csv.DictReader(open(tripfile, encoding="utf-8"),
                                 delimiter=",")
@@ -98,6 +97,8 @@ def totalTrips(analyzer):
     """
     return model.totalTrips(analyzer)
 
+def criticalStations(analyzer):
+    return model.criticalStations(analyzer)
 
 
 def connectedComponents(analyzer):

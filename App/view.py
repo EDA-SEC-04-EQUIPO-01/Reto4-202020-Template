@@ -58,7 +58,7 @@ def printMenu():
     print("2- Cargar información de buses de singapur")
     print("3- Calcular componentes conectados")
     print("4- Establecer estación base:")
-    print("5- Hay camino entre estacion base y estación: ")
+    print("5- Conocer estaciones más concurridas y la menos concurridas: ")
     print("6- Ruta de costo mínimo desde la estación base y estación: ")
     print("7- Estación que sirve a mas rutas: ")
     print("0- Salir")
@@ -70,10 +70,10 @@ def optionTwo():
     controller.loadTrips(cont) 
     numedges = controller.totalConnections(cont)
     numvertex = controller.totalStops(cont)
-    numtrips = controller.totalTrips(cont)
+    #numtrips = controller.totalTrips(cont)
     print('Numero de vertices: ' + str(numvertex))
     print('Numero de arcos: ' + str(numedges))
-    print('Numero de viajes: ' + str(numtrips))
+    #print('Numero de viajes: ' + str(numtrips))
     print('El limite de recursion actual: ' + str(sys.getrecursionlimit()))
     sys.setrecursionlimit(recursionLimit)
     print('El limite de recursion se ajusta a: ' + str(recursionLimit))
@@ -89,10 +89,20 @@ def optionFour():
 
 
 def optionFive():
-    haspath = controller.hasPath(cont, destStation)
-    print('Hay camino entre la estación base : ' +
-          'y la estación: ' + destStation + ': ')
-    print(haspath)
+    critical = controller.criticalStations(cont)
+    print("\nLas estaciones Top de llegada son: \n")
+    for a in critical[0]:
+        print("Estación {0} con {1} llegadas.".format(a[0],a[1]))
+    
+    print("\nLas estaciones Top de salida son: \n")
+    for a in critical[1]:
+        print("Estación {0} con {1} salidas.".format(a[0],a[1]))
+
+    print("\nLas estaciones menos concurridas son: \n")
+    for a in critical[2]:
+        print("Estación {0} con {1} llegadas y salidas.".format(a[0],a[1]))
+
+    
 
 
 def optionSix():
@@ -140,7 +150,6 @@ while True:
         print("Tiempo de ejecución: " + str(executiontime))
 
     elif int(inputs[0]) == 5:
-        destStation = input("Estación destino (Ej: 15151-10): ")
         executiontime = timeit.timeit(optionFive, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 

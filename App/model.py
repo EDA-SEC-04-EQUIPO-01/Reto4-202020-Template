@@ -27,6 +27,7 @@ import config
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
 from DISClib.ADT import list as lt
+from DISClib.ADT import minpq as mq
 from DISClib.DataStructures import listiterator as it
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import dijsktra as djk
@@ -279,6 +280,32 @@ def servedRoutes(analyzer):
             maxdeg = degree
     return maxvert, maxdeg
 
+def criticalStations(analyzer):
+    vertexs = gr.vertices(analyzer["connections"])
+    indegree = mq.newMinPQ(compareinverted)
+    outdegree = mq.newMinPQ(compareinverted)
+    degree = mq.newMinPQ(comparenormal)
+    iterator = it.newIterator(vertexs)
+    res1 = []
+    res2 = []
+    res3 = []
+    while it.hasNext(iterator):
+        element = it.next(iterator)
+        ins = (element,int(gr.indegree(analyzer["connections"],element)))
+        out = (element,int(gr.outdegree(analyzer["connections"],element)))
+        deg = (element,int(gr.degree(analyzer["connections"],element)))
+        mq.insert(indegree,ins)
+        mq.insert(outdegree,out)
+        mq.insert(degree,deg)
+
+    for a in range(1,4):
+        res1.append(mq.delMin(indegree))
+        res2.append(mq.delMin(outdegree))
+        res3.append(mq.delMin(degree)) 
+        
+    return (res1,res2,res3)
+
+    
 
 # ==============================
 # Funciones Helper
@@ -343,4 +370,24 @@ def compareroutes(route1, route2):
         return 1
     else:
         return -1
+
+def comparenormal(tup1, tup2):
+    num1 = tup1[1]
+    num2 = tup2[1]
+    if (num1 == num2):
+        return 0
+    elif (num1 > num2):
+        return 1
+    else:
+        return -1
+        
+def compareinverted(tup1, tup2):
+    num1 = tup1[1]
+    num2 = tup2[1]
+    if (num1 == num2):
+        return 0
+    elif (num1 > num2):
+        return -1
+    else:
+        return 1
         
