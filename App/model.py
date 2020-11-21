@@ -26,6 +26,7 @@
 import config
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
+from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import list as lt
 from DISClib.DataStructures import listiterator as it
 from DISClib.Algorithms.Graphs import scc
@@ -57,7 +58,8 @@ def newAnalyzer():
                     'stops': None,
                     'connections': None,
                     'components': None,
-                    'paths': None
+                    'paths': None,
+                    'stations':None
                     }
 
         analyzer['stops'] = m.newMap(numelements=14000,
@@ -66,8 +68,12 @@ def newAnalyzer():
 
         analyzer['connections'] = gr.newGraph(datastructure='ADJ_LIST',
                                               directed=True,
-                                              size=14000,
+                                              size=950,
                                               comparefunction=compareStopIds)
+        analyzer['stations']=m.newMap(numelements=1900,
+                                      maptype = "PROBING",
+                                      loadfactor=0.5,
+                                      comparefunction=compareStopIds)
 
 
         return analyzer
@@ -89,7 +95,7 @@ def addStation(citibike, stationid):
     """
     Adiciona una estación como un vertice del grafo
     """
-    #Para el reto calcular prom de tiempo entre los vertices y guardarlos.
+
     if not gr.containsVertex(citibike['connections'], stationid):
         gr.insertVertex(citibike['connections'], stationid)
     return citibike
@@ -98,9 +104,33 @@ def addConnection(citibike, origin, destination, duration):
     """
     Adiciona un arco entre dos estaciones
     """
-    edge = gr.getEdge(citibike["connections"], origin, destination)
+    if origin == destination:
+        if m.get(citibike["stations"],origin) != None and m.get(me.getValue(m.get(citibike["stations"],origin)), destination) != None:
+            edge = True
+        else:
+            edge= None
+    else:
+        edge = gr.getEdge(citibike ["connections"], origin, destination)
+
     if edge is None:
-        gr.addEdge(citibike["connections"], origin, destination, duration)
+        if m.get(citibike["stations"], origin) is None:
+            repetitions = m.newMap(numelements=1900,
+                                maptype="PROBING", 
+                                loadfactor=0.5, 
+                                comparefunction=compareStopIds)
+            m.put(citibike["stations"],origin, repetitions)
+        repetitions = me.getValue(m.get(citibike["stations"], origin))
+        m.put(repetitions,destination, [duration, 1])
+    else:
+        one_rep = m.get(citibike["stations"],origin)
+        repetitions = me.getValue(one_rep)
+        two_rep = m.get(repetitions, destination)
+        repetitions_destination = me.getValue(two_rep)
+        repetitions_destination[0]+=duration
+        repetitions_destination[1]+=1
+        duration = repetitions_destination[0]/repetitions_destination[1]
+    gr.addEdge(citibike["connections"], origin, destination, duration)
+    
     return citibike
 
 def addComponents(citibike):
@@ -117,6 +147,9 @@ def clusteredStations(citibike, id1,id2):
     except:
         retorno = (clusters, "")
     return retorno
+
+def routeByResistance(citibike, initialStation, resistanceTime):
+    pass
 
 def connectedComponents(analyzer):
     """
@@ -238,7 +271,7 @@ def compareStations(stop, keyvaluestop):
     """
     
     try:
-        addTrip(stop, keyvaluestop);
+        addTrip(stop, keyvaluestop)
     except:
         print("error")
 
