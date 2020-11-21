@@ -29,6 +29,8 @@ import sys
 import config
 from App import controller
 from DISClib.ADT import stack
+from DISClib.ADT import list as lt
+from DISClib.DataStructures import listiterator as it
 import timeit
 assert config
 
@@ -61,6 +63,7 @@ def printMenu():
     print("5- Conocer estaciones más concurridas y la menos concurridas: ")
     print("6- Ruta de costo mínimo desde la estación base y estación: ")
     print("7- Estación que sirve a mas rutas: ")
+    print("8- Ruta turística más eficiente: ")
     print("0- Salir")
     print("*******************************************")
 
@@ -91,20 +94,24 @@ def optionFour():
 def optionFive():
     critical = controller.criticalStations(cont)
     print("\nLas estaciones Top de llegada son: \n")
-    for a in critical[0]:
+    iterator = it.newIterator(critical[0])
+    while it.hasNext(iterator):
+        a = it.next(iterator)
         print("Estación {0} con {1} llegadas.".format(a[0],a[1]))
     
     print("\nLas estaciones Top de salida son: \n")
-    for a in critical[1]:
+    iterator = it.newIterator(critical[1])
+    while it.hasNext(iterator):
+        a = it.next(iterator)
         print("Estación {0} con {1} salidas.".format(a[0],a[1]))
 
     print("\nLas estaciones menos concurridas son: \n")
-    for a in critical[2]:
+    iterator = it.newIterator(critical[2])
+    while it.hasNext(iterator):
+        a = it.next(iterator)
         print("Estación {0} con {1} llegadas y salidas.".format(a[0],a[1]))
 
     
-
-
 def optionSix():
     path = controller.minimumCostPath(cont, destStation)
     if path is not None:
@@ -122,6 +129,15 @@ def optionSeven():
     print('Estación: ' + maxvert + '  Total rutas servidas: '
           + str(maxdeg))
 
+def optionEight():
+    lat1 = float(input("Inserte la latitud de salida: "))
+    lon1 = float(input("Inserte la longitud de salida: "))
+    lat2 = float(input("Inserte la latitud de llegada: "))
+    lon2 = float(input("Inserte la longitud de llegada: "))
+    res = controller.touristicRoute(lat1,lon1,lat2,lon2,cont)
+    print("La estación más cercana a la posición {0}, {1} (salida) es: {2}".format(lat1,lon1,res[0]))
+    print("La estación más cercana a la posición {0}, {1} (llegada) es: {2}".format(lat2,lon2,res[1]))
+    print("La ruta más corta desde la estación {0} hasta la estación {1} es {2}.\nEsta ruta tiene una duración de {3}.".format(res[0],res[1],res[2],res[3]))
 
 """
 Menu principal
@@ -160,6 +176,10 @@ while True:
 
     elif int(inputs[0]) == 7:
         executiontime = timeit.timeit(optionSeven, number=1)
+        print("Tiempo de ejecución: " + str(executiontime))
+
+    elif int(inputs[0]) == 8:
+        executiontime = timeit.timeit(optionEight, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
     else:

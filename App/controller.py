@@ -70,6 +70,7 @@ def loadFile(citibike, tripfile):
                                 delimiter=",")
     for trip in input_file:
         model.addTrip(citibike, trip)
+        model.addlocation(citibike,trip)
     return citibike
 
 
@@ -99,6 +100,9 @@ def totalTrips(analyzer):
 
 def criticalStations(analyzer):
     return model.criticalStations(analyzer)
+
+def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
+    return model.touristicRoute(latIn, lonIn, latFn, lonFn, analyzer)
 
 
 def connectedComponents(analyzer):
