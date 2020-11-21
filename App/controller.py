@@ -62,7 +62,6 @@ def loadTrips(citibike):
             print('Cargando archivo: ' + filename)
             loadFile(citibike, filename)
     model.addComponents(citibike)
-    print(citibike["connections"])
     return citibike
 
 def loadFile(citibike, tripfile):
