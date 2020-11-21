@@ -68,11 +68,11 @@ def newAnalyzer():
 
         analyzer['connections'] = gr.newGraph(datastructure='ADJ_LIST',
                                               directed=True,
-                                              size=25,
+                                              size=950,
                                               comparefunction=compareStopIds)
-        analyzer['stations']=m.newMap(numelements=50,
+        analyzer['stations']=m.newMap(numelements=1900,
                                       maptype = "PROBING",
-                                      loadfactor=1,
+                                      loadfactor=0.5,
                                       comparefunction=compareStopIds)
 
 
@@ -95,7 +95,7 @@ def addStation(citibike, stationid):
     """
     Adiciona una estación como un vertice del grafo
     """
-    #Para el reto calcular prom de tiempo entre los vertices y guardarlos.
+
     if not gr.containsVertex(citibike['connections'], stationid):
         gr.insertVertex(citibike['connections'], stationid)
     return citibike
@@ -104,8 +104,6 @@ def addConnection(citibike, origin, destination, duration):
     """
     Adiciona un arco entre dos estaciones
     """
-<<<<<<< HEAD
-<<<<<<< HEAD
     if origin == destination:
         if m.get(citibike["stations"],origin) != None and m.get(me.getValue(m.get(citibike["stations"],origin)), destination) != None:
             edge = True
@@ -113,15 +111,10 @@ def addConnection(citibike, origin, destination, duration):
             edge= None
     else:
         edge = gr.getEdge(citibike ["connections"], origin, destination)
-=======
-    edge = gr.getEdge(citibike["connections"], origin, destination)
->>>>>>> 0d46152cc8b8d1ed3d1df412e30ffaab67c1aa4c
-=======
-    edge = gr.getEdge(citibike["connections"], origin, destination)
->>>>>>> 0d46152cc8b8d1ed3d1df412e30ffaab67c1aa4c
+
     if edge is None:
         if m.get(citibike["stations"], origin) is None:
-            repetitions = m.newMap(numelements=20,
+            repetitions = m.newMap(numelements=1900,
                                 maptype="PROBING", 
                                 loadfactor=0.5, 
                                 comparefunction=compareStopIds)
