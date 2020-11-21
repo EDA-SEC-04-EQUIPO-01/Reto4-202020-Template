@@ -105,6 +105,7 @@ def addConnection(citibike, origin, destination, duration):
     Adiciona un arco entre dos estaciones
     """
 <<<<<<< HEAD
+<<<<<<< HEAD
     if origin == destination:
         if m.get(citibike["stations"],origin) != None and m.get(me.getValue(m.get(citibike["stations"],origin)), destination) != None:
             edge = True
@@ -112,6 +113,9 @@ def addConnection(citibike, origin, destination, duration):
             edge= None
     else:
         edge = gr.getEdge(citibike ["connections"], origin, destination)
+=======
+    edge = gr.getEdge(citibike["connections"], origin, destination)
+>>>>>>> 0d46152cc8b8d1ed3d1df412e30ffaab67c1aa4c
 =======
     edge = gr.getEdge(citibike["connections"], origin, destination)
 >>>>>>> 0d46152cc8b8d1ed3d1df412e30ffaab67c1aa4c
