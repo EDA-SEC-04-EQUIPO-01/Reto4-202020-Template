@@ -67,11 +67,15 @@ def printMenu():
 
 def optionTwo():
     print("\nCargando información de transporte de singapur ....")
+
     controller.loadTrips(cont)
+
     numedges = controller.totalConnections(cont)
     numvertex = controller.totalStops(cont)
+    numtrips = controller.totalTrips(cont)
     print('Numero de vertices: ' + str(numvertex))
     print('Numero de arcos: ' + str(numedges))
+    print('Numero de viajes: ' + str(numtrips))
     print('El limite de recursion actual: ' + str(sys.getrecursionlimit()))
     sys.setrecursionlimit(recursionLimit)
     print('El limite de recursion se ajusta a: ' + str(recursionLimit))
@@ -162,3 +166,4 @@ while True:
     else:
         sys.exit(0)
 sys.exit(0)
+
