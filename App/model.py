@@ -104,32 +104,28 @@ def addConnection(citibike, origin, destination, duration):
     """
     Adiciona un arco entre dos estaciones
     """
-    if origin == destination:
-        if m.get(citibike["stations"],origin) != None and m.get(me.getValue(m.get(citibike["stations"],origin)), destination) != None:
-            edge = True
-        else:
-            edge= None
-    else:
+    
+    if origin != destination:
         edge = gr.getEdge(citibike ["connections"], origin, destination)
 
-    if edge is None:
-        if m.get(citibike["stations"], origin) is None:
-            repetitions = m.newMap(numelements=1900,
-                                maptype="PROBING", 
-                                loadfactor=0.5, 
-                                comparefunction=compareStopIds)
-            m.put(citibike["stations"],origin, repetitions)
-        repetitions = me.getValue(m.get(citibike["stations"], origin))
-        m.put(repetitions,destination, [duration, 1])
-    else:
-        one_rep = m.get(citibike["stations"],origin)
-        repetitions = me.getValue(one_rep)
-        two_rep = m.get(repetitions, destination)
-        repetitions_destination = me.getValue(two_rep)
-        repetitions_destination[0]+=duration
-        repetitions_destination[1]+=1
-        duration = repetitions_destination[0]/repetitions_destination[1]
-    gr.addEdge(citibike["connections"], origin, destination, duration)
+        if edge is None:
+            if m.get(citibike["stations"], origin) is None:
+                repetitions = m.newMap(numelements=1900,
+                                    maptype="PROBING", 
+                                    loadfactor=0.5, 
+                                    comparefunction=compareStopIds)
+                m.put(citibike["stations"],origin, repetitions)
+            repetitions = me.getValue(m.get(citibike["stations"], origin))
+            m.put(repetitions,destination, [duration, 1])
+        else:
+            one_rep = m.get(citibike["stations"],origin)
+            repetitions = me.getValue(one_rep)
+            two_rep = m.get(repetitions, destination)
+            repetitions_destination = me.getValue(two_rep)
+            repetitions_destination[0]+=duration
+            repetitions_destination[1]+=1
+            duration = repetitions_destination[0]/repetitions_destination[1]
+        gr.addEdge(citibike["connections"], origin, destination, duration)
     
     return citibike
 
@@ -149,7 +145,7 @@ def clusteredStations(citibike, id1,id2):
     return retorno
 
 def routeByResistance(citibike, initialStation, resistanceTime):
-    pass
+    dijsktra = djk.Dijkstra(citibike, initialStation)
 
 def connectedComponents(analyzer):
     """
