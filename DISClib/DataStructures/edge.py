@@ -49,6 +49,13 @@ def weight(edge):
     """
     return edge['weight']
 
+def setWeight(edge, weight):
+    """
+    Cambia el peso de un arco ya existente
+    """
+    edge["weight"]=weight
+    
+
 
 def either(edge):
     """

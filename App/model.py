@@ -24,6 +24,7 @@
  *
  """
 import config
+from DISClib.DataStructures import edge as ed
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
 from DISClib.DataStructures import mapentry as me
@@ -117,6 +118,7 @@ def addConnection(citibike, origin, destination, duration):
                 m.put(citibike["stations"],origin, repetitions)
             repetitions = me.getValue(m.get(citibike["stations"], origin))
             m.put(repetitions,destination, [duration, 1])
+            gr.addEdge(citibike["connections"], origin, destination, duration)
         else:
             one_rep = m.get(citibike["stations"],origin)
             repetitions = me.getValue(one_rep)
@@ -125,8 +127,7 @@ def addConnection(citibike, origin, destination, duration):
             repetitions_destination[0]+=duration
             repetitions_destination[1]+=1
             duration = repetitions_destination[0]/repetitions_destination[1]
-        gr.addEdge(citibike["connections"], origin, destination, duration)
-    
+            ed.setWeight(edge, duration)
     return citibike
 
 def addComponents(citibike):
