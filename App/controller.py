@@ -136,3 +136,21 @@ def servedRoutes(analyzer):
     maxvert, maxdeg = model.servedRoutes(analyzer)
     return maxvert, maxdeg
     
+def rango_edad(a):
+    centinela=True
+    rango1=0
+    rango2=0
+    if (a == "0-10") or (a == "11-20") or (a == "21-30") or (a == "31-40") or (a == "41-50") or (a == "51-60"):
+        rangos= a.split("-")
+        rango1= 2020-int(rangos[0])
+        rango2= 2020-int(rangos[1])
+    elif (a == "60+"):
+        rango1=2020-60
+        rango2=0
+    else:
+        centinela=False
+    return(centinela,rango1,rango2)
+
+
+def recorrer_dfo(cont, initialStation):
+    return model.recorrer_dfo(cont, initialStation)

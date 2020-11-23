@@ -55,7 +55,7 @@ def printMenu():
     print("*******************************************")
     print("Bienvenido")
     print("1- Inicializar Analizador")
-    print("2- Cargar información de buses de singapur")
+    print("2- Cargar información de buses de New York")
     print("3- Calcular la cantidad de clusters de viajes")
     print("4- Establecer estación base:")
     print("5- Hay camino entre estacion base y estación: ")
@@ -66,7 +66,7 @@ def printMenu():
 
 
 def optionTwo():
-    print("\nCargando información de transporte de singapur ....")
+    print("\nCargando información de transporte de New York ....")
 
     controller.loadTrips(cont)
 
@@ -94,8 +94,12 @@ def optionThree():
         print("Las estaciones no pertenecen al mismo cluster")
 
 
-def optionFour():
-    controller.minimumCostPaths(cont, initialStation)
+def optionFour():  #N
+    rango_min=int(input("Ingresa el tiempo minimo  para hacer una ruta: "))
+    rango_max=int(input("Ingresa el tiempo maximo para hacer una ruta: "))
+    # controller.minimumCostPaths(cont, initialStation)
+    controller.recorrer_dfo(cont, initialStation)
+    # rango_min, rango_max
 
 
 def optionFive():
@@ -117,10 +121,14 @@ def optionSix():
         print('No hay camino')
 
 
-def optionSeven():
-    maxvert, maxdeg = controller.servedRoutes(cont)
-    print('Estación: ' + maxvert + '  Total rutas servidas: '
-          + str(maxdeg))
+
+def optionSeven():   #N
+    validacion = controller.rango_edad(anios)
+    if validacion[0]:
+        print(validacion[1], "y tambien ", validacion[2])
+    else:
+        print("No ingresaste un rango valido, revisa las opciones de nuevo.")
+
 
 
 """
@@ -143,7 +151,8 @@ while True:
         executiontime = timeit.timeit(optionThree, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
-    elif int(inputs[0]) == 4:
+#N
+    elif int(inputs[0]) == 4:      
         msg = "Estación Base: BusStopCode-ServiceNo (Ej: 75009-10): "
         initialStation = input(msg)
         executiontime = timeit.timeit(optionFour, number=1)
@@ -159,7 +168,10 @@ while True:
         executiontime = timeit.timeit(optionSix, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
+    #N
     elif int(inputs[0]) == 7:
+        print("Los rango de edad son: \n0-10\n11-20\n21-30\n31-40\n41-50\n51-60\n60+")
+        anios = input("Ingresa tu rango de edad: ")
         executiontime = timeit.timeit(optionSeven, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 

@@ -297,3 +297,26 @@ def compareroutes(route1, route2):
     else:
         return -1
         
+
+def sccProgram(cont, initialStation, rango_min, rango_max): #NO UTILIZADO
+    un_scc = scc.KosarajuSCC(cont)
+    datos= scc.sccCount(cont, un_scc, initialStation)
+    return datos
+
+def recorrer_dfo(cont, initialStation):
+    search = dfo.DepthFirstOrder(cont["connections"])
+    vertice = dfo.dfsVertex(cont["connections"], search, initialStation)
+    print(vertice["reversepost"])
+    #IDEA NICO: convertir a lista, separar los que salen del inicial, guardarlos en una lista y retornarlos
+    # Luego esta lista voy viendo de este valor hasta el inicial si hay un SCC y si lo hay guardo paradas y el tiempo
+    # Luego sumo el tiempo y multiplico cada paradas x 20 y la sumo, todo esto lo pongo en otra lista
+    #finalmente comparo si cada posicion de esta lista cumple el rango de edad y si es asi lo sumo a la respuesta y la muestro
+
+
+"""def test(graph):
+    search = dfo.DepthFirstOrder(graph)
+    assert stack.size(search["reversepost"]) == 11
+    print("")
+    while not stack.isEmpty(search["reversepost"]):
+        top = stack.pop(search["reversepost"])
+        print(top)"""
