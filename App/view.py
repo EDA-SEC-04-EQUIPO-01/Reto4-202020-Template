@@ -130,15 +130,20 @@ def optionSeven():
           + str(maxdeg))
 
 def optionEight():
-    lat1 = float(input("Inserte la latitud de salida: "))
-    lon1 = float(input("Inserte la longitud de salida: "))
-    lat2 = float(input("Inserte la latitud de llegada: "))
-    lon2 = float(input("Inserte la longitud de llegada: "))
-    res = controller.touristicRoute(lat1,lon1,lat2,lon2,cont)
-    print("La estación más cercana a la posición {0}, {1} (salida) es: {2}".format(lat1,lon1,res[0]))
-    print("La estación más cercana a la posición {0}, {1} (llegada) es: {2}".format(lat2,lon2,res[1]))
-    print("La ruta más corta desde la estación {0} hasta la estación {1} es {2}.\nEsta ruta tiene una duración de {3}.".format(res[0],res[1],res[2],res[3]))
-
+    try:
+        lat1 = float(input("Inserte la latitud de salida: "))
+        lon1 = float(input("Inserte la longitud de salida: "))
+        lat2 = float(input("Inserte la latitud de llegada: "))
+        lon2 = float(input("Inserte la longitud de llegada: "))
+        res = controller.touristicRoute(lat1,lon1,lat2,lon2,cont)
+        print("La estación más cercana a la posición {0}, {1} (salida) es: {2}".format(lat1,lon1,res[0]))
+        print("La estación más cercana a la posición {0}, {1} (llegada) es: {2}".format(lat2,lon2,res[1]))
+        if res[2] != None:
+            print("La ruta más corta desde la estación {0} hasta la estación {1} es {2}.\nEsta ruta tiene una duración de {3}.".format(res[0],res[1],res[2],res[3]))
+        else:
+            print("No existe una ruta entre estas dos estaciones.")
+    except:
+        print("Ingrese valores válidos")
 """
 Menu principal
 """

@@ -334,12 +334,13 @@ def distance(lat1, lat2, lon1, lon2):
         a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
         c = 2 * asin(sqrt(a))   
         r = 6371
-        return(c * r)
+        return round((c * r),3)
     else:
         return "a" 
 
 def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
     vertexs = gr.vertices(analyzer["connections"])
+    print(vertexs)
     iterator = it.newIterator(vertexs)
     sal = ()
     lleg = ()
@@ -350,16 +351,28 @@ def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
 
         distance1 = distance(latIn,location[0],lonIn,location[1])
         distance2 = distance(latFn,location[0],lonFn,location[1])
+        
+        try: 
+            if sal == ():
+                sal = (element,distance1)
+            elif distance1 < sal[1] or (distance1<=sal[1] and gr.outdegree(analyzer["connections"],element)>gr.outdegree(analyzer["connections"],sal[1])):
+                print(distance1, "<", sal[1])
+                print("Numero de salidas",gr.outdegree(analyzer["connections"],element))
+                sal = (element,distance1)
+                
+        except:
+            pass
 
-        if sal == ():
-            sal = (element,distance1)
-        elif distance1 < sal[1]:
-            sal = (element,distance1)
-
-        if lleg == ():
-            lleg = (element,distance2)
-        elif distance2 < lleg[1]:
-            lleg = (element,distance2)
+        try:  
+            if lleg == ():
+                lleg = (element,distance2)
+            elif distance2 < lleg[1] or (distance2<=lleg[1] and gr.indegree(analyzer["connections"],element)>gr.indegree(analyzer["connections"],lleg[1])):
+                print(distance2, "<", lleg[1])
+                print("Numero de llegadas",gr.indegree(analyzer["connections"],element))
+                lleg = (element,distance2)
+                
+        except:
+            pass
 
     analyzer = minimumCostPaths(analyzer,sal[0])
     minpath = minimumCostPath(analyzer,lleg[0])
