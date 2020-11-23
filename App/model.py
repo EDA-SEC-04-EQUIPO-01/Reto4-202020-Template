@@ -25,12 +25,14 @@
  """
 import config
 from DISClib.DataStructures import edge as ed
+from DISClib.ADT import stack as st
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import list as lt
 from DISClib.DataStructures import listiterator as it
 from DISClib.Algorithms.Graphs import scc
+from DISClib.Algorithms.Graphs import bfs
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
 assert config
@@ -59,8 +61,8 @@ def newAnalyzer():
                     'stops': None,
                     'connections': None,
                     'components': None,
-                    'paths': None,
-                    'stations':None
+                    'stations':None,
+                    'births':None
                     }
 
         analyzer['stops'] = m.newMap(numelements=14000,
@@ -69,12 +71,16 @@ def newAnalyzer():
 
         analyzer['connections'] = gr.newGraph(datastructure='ADJ_LIST',
                                               directed=True,
-                                              size=950,
+                                              size=768,
                                               comparefunction=compareStopIds)
-        analyzer['stations']=m.newMap(numelements=1900,
+        analyzer['stations']=m.newMap(numelements=1536,
                                       maptype = "PROBING",
                                       loadfactor=0.5,
                                       comparefunction=compareStopIds)
+        analyzer['births']=m.newMap(numelements=14,
+                                    maptype = "PROBING",
+                                    loadfactor= 0.5,
+                                    comparefunction= compareStopIds)
 
 
         return analyzer
@@ -88,15 +94,73 @@ def addTrip(citibike, trip):
     origin = trip['start station id']
     destination = trip['end station id']
     duration = int(trip['tripduration'])
+    birth = int(trip["birth year"])
+    addBirth(citibike, origin, destination, birth)
     addStation(citibike, origin)
     addStation(citibike, destination)
     addConnection(citibike, origin, destination, duration)
 
+def addRoute(intro, origin):
+    if m.get(intro,origin) is None:
+        m.put(intro, origin, 1)
+        intro_num =1
+    else:
+        m.put(intro, origin, me.getValue(m.get(intro,origin))+1)
+        intro_num =me.getValue(m.get(intro,origin))+1
+    return intro_num
+
+def addMax(intro, intro_num, origin):
+    if intro_num > me.getValue(m.get(intro, "Max"))[0]:
+        m.put(intro, "Max", [intro_num, origin])
+
+def addBirth(citibike,origin,destination,birth):
+    age = 2020-birth
+    rango = None
+    if age<=10:
+        rango = "0-10"
+    elif age<=20:
+        rango = "11-20"
+    elif age <=30:
+        rango = "21-30"
+    elif age <=40:
+        rango = "31-40"
+    elif age <= 50:
+        rango = "41-50"
+    elif age <=60:
+        rango = "51-60"
+    else:
+        rango = "60+"
+    if m.get(citibike["births"], rango) is None:
+        miniHash = m.newMap(numelements=2, 
+                            maptype="CHAINING", 
+                            loadfactor=1, 
+                            comparefunction=compareStopIds)
+        miniHashIntro = m.newMap(numelements=1536, 
+                            maptype="PROBING", 
+                            loadfactor=0.5, 
+                            comparefunction=compareStopIds)
+        miniHashOutro = m.newMap(numelements=1536, 
+                            maptype="PROBING", 
+                            loadfactor=0.5, 
+                            comparefunction=compareStopIds)
+        m.put(miniHash, "Intro", miniHashIntro)
+        m.put(miniHash, "Outro", miniHashOutro)
+        m.put(miniHashIntro, "Max", [0, None])
+        m.put(miniHashOutro, "Max", [0,None])
+        m.put(citibike["births"], rango, miniHash)
+    tabla_rango = me.getValue(m.get(citibike["births"], rango))
+    intro = me.getValue(m.get(tabla_rango,"Intro"))
+    outro = me.getValue(m.get(tabla_rango,"Outro"))
+    intro_num = addRoute(intro,origin)
+    outro_num = addRoute(outro,destination)
+    addMax(intro,intro_num,origin)
+    addMax(outro,outro_num,destination)
+        
 def addStation(citibike, stationid):
     """
     Adiciona una estación como un vertice del grafo
     """
-
+    
     if not gr.containsVertex(citibike['connections'], stationid):
         gr.insertVertex(citibike['connections'], stationid)
     return citibike
@@ -111,7 +175,7 @@ def addConnection(citibike, origin, destination, duration):
 
         if edge is None:
             if m.get(citibike["stations"], origin) is None:
-                repetitions = m.newMap(numelements=1900,
+                repetitions = m.newMap(numelements=1536,
                                     maptype="PROBING", 
                                     loadfactor=0.5, 
                                     comparefunction=compareStopIds)
@@ -136,6 +200,13 @@ def addComponents(citibike):
 # Funciones de consulta
 # ==============================
 
+def connectedComponents(analyzer):
+    """
+    Calcula los componentes conectados del grafo
+    Se utiliza el algoritmo de Kosaraju
+    """
+    return scc.connectedComponents(analyzer['components'])
+
 def clusteredStations(citibike, id1,id2):
     try:
         clusters = connectedComponents(citibike)
@@ -145,15 +216,58 @@ def clusteredStations(citibike, id1,id2):
         retorno = (clusters, "")
     return retorno
 
-def routeByResistance(citibike, initialStation, resistanceTime):
-    dijsktra = djk.Dijkstra(citibike, initialStation)
+def getElement(entry):
+    try:
+        return me.getValue(entry)
+    except:
+        return None
 
-def connectedComponents(analyzer):
-    """
-    Calcula los componentes conectados del grafo
-    Se utiliza el algoritmo de Kosaraju
-    """
-    return scc.connectedComponents(analyzer['components'])
+def routeByResistance(citibike, initialStation, resistanceTime):
+    graph_dfs = bfs.BreadhtFisrtSearch(citibike["connections"], initialStation)
+    keySet =m.keySet(graph_dfs["visited"])
+    valueSet = m.valueSet(graph_dfs["visited"])
+    iterator = it.newIterator(keySet)
+    iterator2 = it.newIterator(valueSet)
+    while it.hasNext(iterator):
+        element = it.next(iterator)
+        element2 = it.next(iterator2)
+        print(bfs.pathTo(graph_dfs, element))
+        print(element2)
+        
+        
+
+def routeByResistance2(citibike, initialStation, resistanceTime):
+    dijsktra = djk.Dijkstra(citibike["connections"], initialStation)
+    vertices = gr.vertices(citibike["connections"])
+    iterator = it.newIterator(vertices)
+    trueStations = st.newStack()
+    stops = m.newMap(numelements=768,
+                    maptype="CHAINING",
+                    loadfactor=1,
+                    comparefunction=compareStopIds)
+    while it.hasNext(iterator):
+        element = it.next(iterator)
+        if element != initialStation and djk.hasPathTo(dijsktra, element) is True:
+            if m.get(stops, element) is None or getElement(m.get(stops, element))["value"] is False:
+                if djk.distTo(dijsktra,element) <= resistanceTime:
+                    pila= djk.pathTo(dijsktra,element)
+                    pila2 = djk.pathTo(dijsktra,element)
+                    size_pila = 0
+                    repetition = False
+                    lon_pila = st.size(pila)
+                    watcher = {"value": True}
+                    while size_pila < lon_pila and repetition == False:
+                        pop = st.pop(pila)["vertexB"]
+                        if m.get(stops,pop) is None or getElement(m.get(stops,pop))["value"] is False:
+                            m.put(stops,pop,watcher)
+                        else:
+                            repetition = True
+                            watcher["value"]=False
+                        size_pila +=1
+                    if repetition == False:
+                        st.push(trueStations, pila2)
+    return trueStations
+                    
 
 
 def minimumCostPaths(analyzer, initialStation):

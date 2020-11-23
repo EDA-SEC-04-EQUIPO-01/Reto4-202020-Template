@@ -62,7 +62,6 @@ def loadTrips(citibike):
             print('Cargando archivo: ' + filename)
             loadFile(citibike, filename)
     model.addComponents(citibike)
-    print(model.totalConnections(citibike))
     return citibike
 
 def loadFile(citibike, tripfile):
@@ -136,3 +135,5 @@ def servedRoutes(analyzer):
     maxvert, maxdeg = model.servedRoutes(analyzer)
     return maxvert, maxdeg
     
+def routeByResistance(citibike,initialStation,resistanceTime):
+    return model.routeByResistance(citibike,initialStation,resistanceTime)
