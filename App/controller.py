@@ -62,7 +62,6 @@ def loadTrips(citibike):
             print('Cargando archivo: ' + filename)
             loadFile(citibike, filename)
     model.addComponents(citibike)
-    print(model.totalConnections(citibike))
     return citibike
 
 def loadFile(citibike, tripfile):
@@ -136,21 +135,41 @@ def servedRoutes(analyzer):
     maxvert, maxdeg = model.servedRoutes(analyzer)
     return maxvert, maxdeg
     
+
 def rango_edad(a):
     centinela=True
     rango1=0
     rango2=0
     if (a == "0-10") or (a == "11-20") or (a == "21-30") or (a == "31-40") or (a == "41-50") or (a == "51-60"):
         rangos= a.split("-")
-        rango1= 2020-int(rangos[0])
-        rango2= 2020-int(rangos[1])
+        rango2= 2020-int(rangos[0])
+        rango1= 2020-int(rangos[1])
     elif (a == "60+"):
-        rango1=2020-60
-        rango2=0
+        rango2=2020-60
+        rango1=0
     else:
         centinela=False
     return(centinela,rango1,rango2)
 
 
 def recorrer_dfo(cont, initialStation):
-    return model.recorrer_dfo(cont, initialStation)
+    lista=[""]
+    lista_salidas = model.recorrer_dfo(cont, initialStation)
+    un_scc = model.sccCrear(cont["connections"]) #mmmm
+    for x in range(0, len(lista_salidas)):
+        print(lista_salidas[x])
+        funciona = model.sccBuscar(un_scc, initialStation, lista_salidas[x])
+        if funciona == True:
+            busquedas = minimumCostPaths(cont["connections"], initialStation)
+            respuesta = minimumCostPath(busquedas, lista_salidas[x])
+            lista.append(respuesta)
+    return lista
+
+
+
+def buscarInicio(citibike, fecha1, fecha2):
+    return model.buscarInicio(citibike, fecha1, fecha2)
+
+
+def buscarFinal(citibike, fecha1, fecha2):
+    return model.buscarFinal(citibike, fecha1, fecha2)

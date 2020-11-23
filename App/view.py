@@ -98,7 +98,8 @@ def optionFour():  #N
     rango_min=int(input("Ingresa el tiempo minimo  para hacer una ruta: "))
     rango_max=int(input("Ingresa el tiempo maximo para hacer una ruta: "))
     # controller.minimumCostPaths(cont, initialStation)
-    controller.recorrer_dfo(cont, initialStation)
+    respuesta = controller.recorrer_dfo(cont, initialStation)
+    print("la respuesta es: ", respuesta)
     # rango_min, rango_max
 
 
@@ -125,7 +126,14 @@ def optionSix():
 def optionSeven():   #N
     validacion = controller.rango_edad(anios)
     if validacion[0]:
-        print(validacion[1], "y tambien ", validacion[2])
+        print(validacion[1], "hasta ", validacion[2])
+        #tupla con valor 0 el nombre de la parada y 1 la cantidad
+        inicio = controller.buscarInicio(cont, validacion[1], validacion[2])
+        print(inicio)
+        final = controller.buscarFinal(cont, validacion[1], validacion[2])
+        print(final)
+        camino = 0 #usar min cost path
+        print(camino)
     else:
         print("No ingresaste un rango valido, revisa las opciones de nuevo.")
 
@@ -151,7 +159,7 @@ while True:
         executiontime = timeit.timeit(optionThree, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
-#N
+    #N
     elif int(inputs[0]) == 4:      
         msg = "Estación Base: BusStopCode-ServiceNo (Ej: 75009-10): "
         initialStation = input(msg)
