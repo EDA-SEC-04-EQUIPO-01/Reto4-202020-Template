@@ -31,6 +31,7 @@ from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import list as lt
 from DISClib.DataStructures import listiterator as it
 from DISClib.Algorithms.Graphs import scc
+from DISClib.Algorithms.Graphs import dfo
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
 assert config
@@ -297,26 +298,44 @@ def compareroutes(route1, route2):
     else:
         return -1
         
+def sccCrear(cont):
+    respuesta = scc.KosarajuSCC(cont)
+    return respuesta
 
-def sccProgram(cont, initialStation, rango_min, rango_max): #NO UTILIZADO
-    un_scc = scc.KosarajuSCC(cont)
-    datos= scc.sccCount(cont, un_scc, initialStation)
+def sccBuscar(un_scc, station1, station2): #NO UTILIZADO
+    datos= scc.stronglyConnected(un_scc, station1, station2)
     return datos
 
 def recorrer_dfo(cont, initialStation):
     search = dfo.DepthFirstOrder(cont["connections"])
     vertice = dfo.dfsVertex(cont["connections"], search, initialStation)
-    print(vertice["reversepost"])
-    #IDEA NICO: convertir a lista, separar los que salen del inicial, guardarlos en una lista y retornarlos
+    """print(vertice["reversepost"])"""
+    # IDEA NICO: convertir a lista, separar los que salen del inicial, guardarlos en una lista y retornarlos
+    # en otra funcion cojo cada uno de la lista y hago el min path a el original, 
     # Luego esta lista voy viendo de este valor hasta el inicial si hay un SCC y si lo hay guardo paradas y el tiempo
     # Luego sumo el tiempo y multiplico cada paradas x 20 y la sumo, todo esto lo pongo en otra lista
     #finalmente comparo si cada posicion de esta lista cumple el rango de edad y si es asi lo sumo a la respuesta y la muestro
+    lista=["ESTACION 2","ESTACION 7","ESTACION 8"]
+    return lista
 
-
-"""def test(graph):
+def test(graph):
     search = dfo.DepthFirstOrder(graph)
     assert stack.size(search["reversepost"]) == 11
     print("")
     while not stack.isEmpty(search["reversepost"]):
         top = stack.pop(search["reversepost"])
-        print(top)"""
+        print(top)
+
+
+
+def buscarInicio(cont, fecha1, fecha2):
+    print(cont["components"])
+    for a in cont["components"]:
+        pass
+        #print(cont["stations"][a])
+    #funcion que lea viaje por viaje y compare el "birth"
+    return 0
+
+
+def buscarFinal(cont, fecha1, fecha2):
+    return 0
