@@ -55,11 +55,11 @@ def printMenu():
     print("*******************************************")
     print("Bienvenido")
     print("1- Inicializar Analizador")
-    print("2- Cargar información de buses de New York")
+    print("2- Cargar información de rutas de citibike")
     print("3- Calcular la cantidad de clusters de viajes")
     print("4- Establecer estación base:")
     print("5- Hay camino entre estacion base y estación: ")
-    print("6- Ruta de costo mínimo desde la estación base y estación: ")
+    print("6- Ver rutas según un punto de inicio y un tiempo limite: ")
     print("7- Estación que sirve a mas rutas: ")
     print("0- Salir")
     print("*******************************************")
@@ -82,8 +82,6 @@ def optionTwo():
 
 
 def optionThree():
-    id1 = input("Introduzca una estación: ")
-    id2 = input("Introduzca la otra estación para saber si pertenecen al mismo cluster: ")
     clustered = controller.clusteredStations(cont, id1, id2)
     print('El número clusters en el grafo es: ' + str(clustered[0]))
     if clustered[1]==True:
@@ -111,15 +109,17 @@ def optionFive():
 
 
 def optionSix():
-    path = controller.minimumCostPath(cont, destStation)
-    if path is not None:
-        pathlen = stack.size(path)
-        print('El camino es de longitud: ' + str(pathlen))
-        while (not stack.isEmpty(path)):
-            stop = stack.pop(path)
-            print(stop)
+    path = controller.routeByResistance(cont, initialStation, resistanceTime)
+    """if stack.isEmpty(path) is False:
+        for i in range(0, stack.size(path)):
+            print("\nRuta", i+1)
+            sub_pila = stack.pop(path)
+            for j in range(0, stack.size(sub_pila)):
+                edge = stack.pop(sub_pila)
+                print("Segmento",j+1)
+                print("Entre",edge["vertexA"],"y",edge["vertexB"],"te demoras",edge["weight"],"minutos")
     else:
-        print('No hay camino')
+        print("No hay ninguna ruta para ese tiempo estipulado")"""
 
 
 
@@ -156,13 +156,15 @@ while True:
         print("Tiempo de ejecución: " + str(executiontime))
 
     elif int(inputs[0]) == 3:
+        id1 = input("Introduzca una estación: ")
+        id2 = input("Introduzca la otra estación para saber si pertenecen al mismo cluster: ")
         executiontime = timeit.timeit(optionThree, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
     #N
     elif int(inputs[0]) == 4:      
         msg = "Estación Base: BusStopCode-ServiceNo (Ej: 75009-10): "
-        initialStation = input(msg)
+        iStation = input(msg)
         executiontime = timeit.timeit(optionFour, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
@@ -172,7 +174,8 @@ while True:
         print("Tiempo de ejecución: " + str(executiontime))
 
     elif int(inputs[0]) == 6:
-        destStation = input("Estación destino (Ej: 15151-10): ")
+        initialStation = input("Estación destino (Ej: 15151-10): ")
+        resistanceTime = int(input("Introduce el tiempo de resistencia en minutos: "))
         executiontime = timeit.timeit(optionSix, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
