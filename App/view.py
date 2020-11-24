@@ -96,8 +96,13 @@ def optionThree():
         print("Las estaciones no pertenecen al mismo cluster")
 
 
-def optionFour():
-    controller.minimumCostPaths(cont, initialStation)
+def optionFour():  #N
+    rango_min=int(input("Ingresa el tiempo minimo  para hacer una ruta: "))
+    rango_max=int(input("Ingresa el tiempo maximo para hacer una ruta: "))
+    # controller.minimumCostPaths(cont, initialStation)
+    respuesta = controller.recorrer_dfo(cont, initialStation)
+    print("la respuesta es: ", respuesta)
+    # rango_min, rango_max
 
 
 def optionFive():
@@ -121,10 +126,21 @@ def optionSix():
         print("No hay ninguna ruta para ese tiempo estipulado")
 
 
-def optionSeven():
-    maxvert, maxdeg = controller.servedRoutes(cont)
-    print('Estación: ' + maxvert + '  Total rutas servidas: '
-          + str(maxdeg))
+
+def optionSeven():   #N
+    validacion = controller.rango_edad(anios)
+    if validacion[0]:
+        print(validacion[1], "hasta ", validacion[2])
+        #tupla con valor 0 el nombre de la parada y 1 la cantidad
+        inicio = controller.buscarInicio(cont, validacion[1], validacion[2])
+        print(inicio)
+        final = controller.buscarFinal(cont, validacion[1], validacion[2])
+        print(final)
+        camino = 0 #usar min cost path
+        print(camino)
+    else:
+        print("No ingresaste un rango valido, revisa las opciones de nuevo.")
+
 
 def optionNine():
     bestRoute = controller.stationsForPublicity(cont, ageRange)
@@ -162,7 +178,8 @@ while True:
         executiontime = timeit.timeit(optionThree, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
-    elif int(inputs[0]) == 4:
+    #N
+    elif int(inputs[0]) == 4:      
         msg = "Estación Base: BusStopCode-ServiceNo (Ej: 75009-10): "
         iStation = input(msg)
         executiontime = timeit.timeit(optionFour, number=1)
@@ -179,7 +196,10 @@ while True:
         executiontime = timeit.timeit(optionSix, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
+    #N
     elif int(inputs[0]) == 7:
+        print("Los rango de edad son: \n0-10\n11-20\n21-30\n31-40\n41-50\n51-60\n60+")
+        anios = input("Ingresa tu rango de edad: ")
         executiontime = timeit.timeit(optionSeven, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
