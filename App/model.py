@@ -65,7 +65,7 @@ def newAnalyzer():
                     'connections': None,
                     'components': None,
                     'paths': None,
-                    'location':None
+                    'location':None,
                     'stations':None,
                     'births':None
                     }
