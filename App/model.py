@@ -24,6 +24,8 @@
  *
  """
 import config
+from DISClib.DataStructures import edge as ed
+from DISClib.ADT import stack as st
 from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
 from DISClib.DataStructures import mapentry as me
@@ -31,6 +33,8 @@ from DISClib.ADT import list as lt
 from DISClib.ADT import minpq as mq
 from DISClib.DataStructures import listiterator as it
 from DISClib.Algorithms.Graphs import scc
+from DISClib.Algorithms.Graphs import bfs
+from DISClib.Algorithms.Graphs import dfo
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
 from math import radians, cos, sin, asin, sqrt 
@@ -61,8 +65,9 @@ def newAnalyzer():
                     'connections': None,
                     'components': None,
                     'paths': None,
-                    'graph':None,
                     'location':None
+                    'stations':None,
+                    'births':None
                     }
 
         analyzer['stops'] = m.newMap(numelements=14000,
@@ -71,8 +76,16 @@ def newAnalyzer():
 
         analyzer['connections'] = gr.newGraph(datastructure='ADJ_LIST',
                                               directed=True,
-                                              size=14000,
+                                              size=768,
                                               comparefunction=compareStopIds)
+        analyzer['stations']=m.newMap(numelements=1536,
+                                      maptype = "PROBING",
+                                      loadfactor=0.5,
+                                      comparefunction=compareStopIds)
+        analyzer['births']=m.newMap(numelements=14,
+                                    maptype = "PROBING",
+                                    loadfactor= 0.5,
+                                    comparefunction= compareStopIds)
 
         analyzer['location'] = m.newMap(numelements=14000,
                                      maptype='PROBING',
@@ -89,15 +102,73 @@ def addTrip(citibike, trip):
     origin = trip['start station id']
     destination = trip['end station id']
     duration = int(trip['tripduration'])
+    birth = int(trip["birth year"])
+    addBirth(citibike, origin, destination, birth)
     addStation(citibike, origin)
     addStation(citibike, destination)
     addConnection(citibike, origin, destination, duration)
 
+def addRoute(intro, origin):
+    if m.get(intro,origin) is None:
+        m.put(intro, origin, 1)
+        intro_num =1
+    else:
+        m.put(intro, origin, me.getValue(m.get(intro,origin))+1)
+        intro_num =me.getValue(m.get(intro,origin))+1
+    return intro_num
+
+def addMax(intro, intro_num, origin):
+    if intro_num > me.getValue(m.get(intro, "Max"))[0]:
+        m.put(intro, "Max", [intro_num, origin])
+
+def addBirth(citibike,origin,destination,birth):
+    age = 2020-birth
+    rango = None
+    if age<=10:
+        rango = "0-10"
+    elif age<=20:
+        rango = "11-20"
+    elif age <=30:
+        rango = "21-30"
+    elif age <=40:
+        rango = "31-40"
+    elif age <= 50:
+        rango = "41-50"
+    elif age <=60:
+        rango = "51-60"
+    else:
+        rango = "60+"
+    if m.get(citibike["births"], rango) is None:
+        miniHash = m.newMap(numelements=2, 
+                            maptype="CHAINING", 
+                            loadfactor=1, 
+                            comparefunction=compareStopIds)
+        miniHashIntro = m.newMap(numelements=1536, 
+                            maptype="PROBING", 
+                            loadfactor=0.5, 
+                            comparefunction=compareStopIds)
+        miniHashOutro = m.newMap(numelements=1536, 
+                            maptype="PROBING", 
+                            loadfactor=0.5, 
+                            comparefunction=compareStopIds)
+        m.put(miniHash, "Intro", miniHashIntro)
+        m.put(miniHash, "Outro", miniHashOutro)
+        m.put(miniHashIntro, "Max", [0, None])
+        m.put(miniHashOutro, "Max", [0,None])
+        m.put(citibike["births"], rango, miniHash)
+    tabla_rango = me.getValue(m.get(citibike["births"], rango))
+    intro = me.getValue(m.get(tabla_rango,"Intro"))
+    outro = me.getValue(m.get(tabla_rango,"Outro"))
+    intro_num = addRoute(intro,origin)
+    outro_num = addRoute(outro,destination)
+    addMax(intro,intro_num,origin)
+    addMax(outro,outro_num,destination)
+        
 def addStation(citibike, stationid):
     """
     Adiciona una estación como un vertice del grafo
     """
-    #Para el reto calcular prom de tiempo entre los vertices y guardarlos.
+    
     if not gr.containsVertex(citibike['connections'], stationid):
         gr.insertVertex(citibike['connections'], stationid)
     return citibike
@@ -106,71 +177,31 @@ def addConnection(citibike, origin, destination, duration):
     """
     Adiciona un arco entre dos estaciones
     """
-    edge = gr.getEdge(citibike["connections"], origin, destination)
-    if edge is None:
-        gr.addEdge(citibike["connections"], origin, destination, duration)
+    
+    if origin != destination:
+        edge = gr.getEdge(citibike ["connections"], origin, destination)
+
+        if edge is None:
+            if m.get(citibike["stations"], origin) is None:
+                repetitions = m.newMap(numelements=1536,
+                                    maptype="PROBING", 
+                                    loadfactor=0.5, 
+                                    comparefunction=compareStopIds)
+                m.put(citibike["stations"],origin, repetitions)
+            repetitions = me.getValue(m.get(citibike["stations"], origin))
+            m.put(repetitions,destination, [duration, 1])
+            gr.addEdge(citibike["connections"], origin, destination, duration)
+        else:
+            one_rep = m.get(citibike["stations"],origin)
+            repetitions = me.getValue(one_rep)
+            two_rep = m.get(repetitions, destination)
+            repetitions_destination = me.getValue(two_rep)
+            repetitions_destination[0]+=duration
+            repetitions_destination[1]+=1
+            duration = repetitions_destination[0]/repetitions_destination[1]
+            ed.setWeight(edge, duration)
     return citibike
-
-
-
-
-# Funciones para agregar informacion al grafo
-
-def addStopConnection(analyzer, lastservice, service):
-    """
-    Adiciona las estaciones al grafo como vertices y arcos entre las
-    estaciones adyacentes.
-
-    Los vertices tienen por nombre el identificador de la estacion
-    seguido de la ruta que sirve.  Por ejemplo:
-
-    75009-10
-
-    Si la estacion sirve otra ruta, se tiene: 75009-101
-    """
-    try:
-        origin = formatVertex(lastservice)
-        destination = formatVertex(service)
-        cleanServiceDistance(lastservice, service)
-        distance = float(service['Distance']) - float(lastservice['Distance'])
-        addStop(analyzer, origin)
-        addStop(analyzer, destination)
-        addConnection(analyzer, origin, destination, distance)
-        addRouteStop(analyzer, service)
-        addRouteStop(analyzer, lastservice)
-        return analyzer
-    except Exception as exp:
-        error.reraise(exp, 'model:addStopConnection')
-
-
-def addStop(analyzer, stopid):
-    """
-    Adiciona una estación como un vertice del grafo
-    """
-    try:
-        if not gr.containsVertex(analyzer['connections'], stopid):
-            gr.insertVertex(analyzer['connections'], stopid)
-        return analyzer
-    except Exception as exp:
-        error.reraise(exp, 'model:addstop')
-
-
-def addRouteStop(analyzer, service):
-    """
-    Agrega a una estacion, una ruta que es servida en ese paradero
-    """
-    entry = m.get(analyzer['stops'], service['BusStopCode'])
-    if entry is None:
-        lstroutes = lt.newList(cmpfunction=compareroutes)
-        lt.addLast(lstroutes, service['ServiceNo'])
-        m.put(analyzer['stops'], service['BusStopCode'], lstroutes)
-    else:
-        lstroutes = entry['value']
-        info = service['ServiceNo']
-        if not lt.isPresent(lstroutes, info):
-            lt.addLast(lstroutes, info)
-    return analyzer
-
+  
 def addlocation(analyzer, trip):
     """
     Agrega a una estacion, su posición en latitud y longitud
@@ -184,42 +215,81 @@ def addlocation(analyzer, trip):
     return analyzer
 
 
-def addRouteConnections(analyzer):
-    """
-    Por cada vertice (cada estacion) se recorre la lista
-    de rutas servidas en dicha estación y se crean
-    arcos entre ellas para representar el cambio de ruta
-    que se puede realizar en una estación.
-    """
-    lststops = m.keySet(analyzer['stops'])
-    stopsiterator = it.newIterator(lststops)
-    while it.hasNext(stopsiterator):
-        key = it.next(stopsiterator)
-        lstroutes = m.get(analyzer['stops'], key)['value']
-        prevrout = None
-        routeiterator = it.newIterator(lstroutes)
-        while it.hasNext(routeiterator):
-            route = key + '-' + it.next(routeiterator)
-            if prevrout is not None:
-                addConnection(analyzer, prevrout, route, 0)
-                addConnection(analyzer, route, prevrout, 0)
-            prevrout = route
-
-
-#
+def addComponents(citibike):
+    citibike['components'] = scc.KosarajuSCC(citibike['connections'])
 
 # ==============================
 # Funciones de consulta
 # ==============================
-
 
 def connectedComponents(analyzer):
     """
     Calcula los componentes conectados del grafo
     Se utiliza el algoritmo de Kosaraju
     """
-    analyzer['components'] = scc.KosarajuSCC(analyzer['connections'])
     return scc.connectedComponents(analyzer['components'])
+
+def clusteredStations(citibike, id1,id2):
+    try:
+        clusters = connectedComponents(citibike)
+        isThereCluster = scc.stronglyConnected(citibike["components"], id1,id2)
+        retorno = (clusters, isThereCluster)
+    except:
+        retorno = (clusters, "")
+    return retorno
+
+def getElement(entry):
+    try:
+        return me.getValue(entry)
+    except:
+        return None
+
+def routeByResistance(citibike, initialStation, resistanceTime):
+    graph_dfs = bfs.BreadhtFisrtSearch(citibike["connections"], initialStation)
+    keySet =m.keySet(graph_dfs["visited"])
+    valueSet = m.valueSet(graph_dfs["visited"])
+    iterator = it.newIterator(keySet)
+    iterator2 = it.newIterator(valueSet)
+    while it.hasNext(iterator):
+        element = it.next(iterator)
+        element2 = it.next(iterator2)
+        print(bfs.pathTo(graph_dfs, element))
+        print(element2)
+        
+        
+
+def routeByResistance2(citibike, initialStation, resistanceTime):
+    dijsktra = djk.Dijkstra(citibike["connections"], initialStation)
+    vertices = gr.vertices(citibike["connections"])
+    iterator = it.newIterator(vertices)
+    trueStations = st.newStack()
+    stops = m.newMap(numelements=768,
+                    maptype="CHAINING",
+                    loadfactor=1,
+                    comparefunction=compareStopIds)
+    while it.hasNext(iterator):
+        element = it.next(iterator)
+        if element != initialStation and djk.hasPathTo(dijsktra, element) is True:
+            if m.get(stops, element) is None or getElement(m.get(stops, element))["value"] is False:
+                if djk.distTo(dijsktra,element) <= resistanceTime:
+                    pila= djk.pathTo(dijsktra,element)
+                    pila2 = djk.pathTo(dijsktra,element)
+                    size_pila = 0
+                    repetition = False
+                    lon_pila = st.size(pila)
+                    watcher = {"value": True}
+                    while size_pila < lon_pila and repetition == False:
+                        pop = st.pop(pila)["vertexB"]
+                        if m.get(stops,pop) is None or getElement(m.get(stops,pop))["value"] is False:
+                            m.put(stops,pop,watcher)
+                        else:
+                            repetition = True
+                            watcher["value"]=False
+                        size_pila +=1
+                    if repetition == False:
+                        st.push(trueStations, pila2)
+    return trueStations
+                    
 
 
 def minimumCostPaths(analyzer, initialStation):
@@ -358,8 +428,7 @@ def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
             elif distance1 < sal[1] or (distance1<=sal[1] and gr.outdegree(analyzer["connections"],element)>gr.outdegree(analyzer["connections"],sal[1])):
                 print(distance1, "<", sal[1])
                 print("Numero de salidas",gr.outdegree(analyzer["connections"],element))
-                sal = (element,distance1)
-                
+                sal = (element,distance1)   
         except:
             pass
 
@@ -369,8 +438,7 @@ def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
             elif distance2 < lleg[1] or (distance2<=lleg[1] and gr.indegree(analyzer["connections"],element)>gr.indegree(analyzer["connections"],lleg[1])):
                 print(distance2, "<", lleg[1])
                 print("Numero de llegadas",gr.indegree(analyzer["connections"],element))
-                lleg = (element,distance2)
-                
+                lleg = (element,distance2)   
         except:
             pass
 
@@ -418,7 +486,7 @@ def compareStations(stop, keyvaluestop):
     """
     
     try:
-        addTrip(stop, keyvaluestop);
+        addTrip(stop, keyvaluestop)
     except:
         print("error")
 
