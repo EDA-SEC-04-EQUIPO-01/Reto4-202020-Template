@@ -56,12 +56,13 @@ def init():
 #  de datos en los modelos
 # ___________________________________________________
 
-def loadTrips(analyzer):
+def loadTrips(citibike):
     for filename in os.listdir(cf.data_dir):
         if filename.endswith('.csv'):
             print('Cargando archivo: ' + filename)
-            loadFile(analyzer, filename)
-    return analyzer
+            loadFile(citibike, filename)
+    model.addComponents(citibike)
+    return citibike
 
 def loadFile(citibike, tripfile):
 
@@ -72,6 +73,7 @@ def loadFile(citibike, tripfile):
         model.addTrip(citibike, trip)
         model.addlocation(citibike,trip)
     return citibike
+
 
 
 # ___________________________________________________
@@ -105,11 +107,8 @@ def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
     return model.touristicRoute(latIn, lonIn, latFn, lonFn, analyzer)
 
 
-def connectedComponents(analyzer):
-    """
-    Numero de componentes fuertemente conectados
-    """
-    return model.connectedComponents(analyzer)
+def clusteredStations(analyzer, id1, id2):
+    return model.clusteredStations(analyzer, id1, id2)
 
 
 def minimumCostPaths(analyzer, initialStation):
@@ -141,3 +140,7 @@ def servedRoutes(analyzer):
     maxvert, maxdeg = model.servedRoutes(analyzer)
     return maxvert, maxdeg
     
+
+def routeByResistance(citibike,initialStation,resistanceTime):
+    return model.routeByResistance(citibike,initialStation,resistanceTime)
+

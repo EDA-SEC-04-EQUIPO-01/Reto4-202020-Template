@@ -57,11 +57,11 @@ def printMenu():
     print("*******************************************")
     print("Bienvenido")
     print("1- Inicializar Analizador")
-    print("2- Cargar información de buses de singapur")
-    print("3- Calcular componentes conectados")
+    print("2- Cargar información de rutas de citibike")
+    print("3- Calcular la cantidad de clusters de viajes")
     print("4- Establecer estación base:")
     print("5- Conocer estaciones más concurridas y la menos concurridas: ")
-    print("6- Ruta de costo mínimo desde la estación base y estación: ")
+    print("6- Ver rutas según un punto de inicio y un tiempo limite: ")
     print("7- Estación que sirve a mas rutas: ")
     print("8- Ruta turística más eficiente: ")
     print("0- Salir")
@@ -69,8 +69,10 @@ def printMenu():
 
 
 def optionTwo():
-    print("\nCargando información de transporte de singapur ....")
-    controller.loadTrips(cont) 
+    print("\nCargando información de transporte de New York ....")
+
+    controller.loadTrips(cont)
+
     numedges = controller.totalConnections(cont)
     numvertex = controller.totalStops(cont)
     #numtrips = controller.totalTrips(cont)
@@ -83,12 +85,23 @@ def optionTwo():
 
 
 def optionThree():
-    print('El número de componentes conectados es: ' +
-          str(controller.connectedComponents(cont)))
+    clustered = controller.clusteredStations(cont, id1, id2)
+    print('El número clusters en el grafo es: ' + str(clustered[0]))
+    if clustered[1]==True:
+        print("Las estaciones", id1, "y", id2, "pertenecen al mismo cluster.")
+    elif clustered[1]=="":
+        print("Alguna de las estaciones no existe en nuestra base de datos.")
+    else:
+        print("Las estaciones no pertenecen al mismo cluster")
 
 
-def optionFour():
-    controller.minimumCostPaths(cont, initialStation)
+def optionFour():  #N
+    rango_min=int(input("Ingresa el tiempo minimo  para hacer una ruta: "))
+    rango_max=int(input("Ingresa el tiempo maximo para hacer una ruta: "))
+    # controller.minimumCostPaths(cont, initialStation)
+    respuesta = controller.recorrer_dfo(cont, initialStation)
+    print("la respuesta es: ", respuesta)
+    # rango_min, rango_max
 
 
 def optionFive():
@@ -113,21 +126,34 @@ def optionFive():
 
     
 def optionSix():
-    path = controller.minimumCostPath(cont, destStation)
-    if path is not None:
-        pathlen = stack.size(path)
-        print('El camino es de longitud: ' + str(pathlen))
-        while (not stack.isEmpty(path)):
-            stop = stack.pop(path)
-            print(stop)
+    path = controller.routeByResistance(cont, initialStation, resistanceTime)
+    """if stack.isEmpty(path) is False:
+        for i in range(0, stack.size(path)):
+            print("\nRuta", i+1)
+            sub_pila = stack.pop(path)
+            for j in range(0, stack.size(sub_pila)):
+                edge = stack.pop(sub_pila)
+                print("Segmento",j+1)
+                print("Entre",edge["vertexA"],"y",edge["vertexB"],"te demoras",edge["weight"],"minutos")
     else:
-        print('No hay camino')
+        print("No hay ninguna ruta para ese tiempo estipulado")"""
 
 
-def optionSeven():
-    maxvert, maxdeg = controller.servedRoutes(cont)
-    print('Estación: ' + maxvert + '  Total rutas servidas: '
-          + str(maxdeg))
+
+def optionSeven():   #N
+    validacion = controller.rango_edad(anios)
+    if validacion[0]:
+        print(validacion[1], "hasta ", validacion[2])
+        #tupla con valor 0 el nombre de la parada y 1 la cantidad
+        inicio = controller.buscarInicio(cont, validacion[1], validacion[2])
+        print(inicio)
+        final = controller.buscarFinal(cont, validacion[1], validacion[2])
+        print(final)
+        camino = 0 #usar min cost path
+        print(camino)
+    else:
+        print("No ingresaste un rango valido, revisa las opciones de nuevo.")
+
 
 def optionEight():
     try:
@@ -161,12 +187,15 @@ while True:
         print("Tiempo de ejecución: " + str(executiontime))
 
     elif int(inputs[0]) == 3:
+        id1 = input("Introduzca una estación: ")
+        id2 = input("Introduzca la otra estación para saber si pertenecen al mismo cluster: ")
         executiontime = timeit.timeit(optionThree, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
-    elif int(inputs[0]) == 4:
+    #N
+    elif int(inputs[0]) == 4:      
         msg = "Estación Base: BusStopCode-ServiceNo (Ej: 75009-10): "
-        initialStation = input(msg)
+        iStation = input(msg)
         executiontime = timeit.timeit(optionFour, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
@@ -175,11 +204,15 @@ while True:
         print("Tiempo de ejecución: " + str(executiontime))
 
     elif int(inputs[0]) == 6:
-        destStation = input("Estación destino (Ej: 15151-10): ")
+        initialStation = input("Estación destino (Ej: 15151-10): ")
+        resistanceTime = int(input("Introduce el tiempo de resistencia en minutos: "))
         executiontime = timeit.timeit(optionSix, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
+    #N
     elif int(inputs[0]) == 7:
+        print("Los rango de edad son: \n0-10\n11-20\n21-30\n31-40\n41-50\n51-60\n60+")
+        anios = input("Ingresa tu rango de edad: ")
         executiontime = timeit.timeit(optionSeven, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
