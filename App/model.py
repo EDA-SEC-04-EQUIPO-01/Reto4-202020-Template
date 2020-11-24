@@ -30,12 +30,14 @@ from DISClib.ADT.graph import gr
 from DISClib.ADT import map as m
 from DISClib.DataStructures import mapentry as me
 from DISClib.ADT import list as lt
+from DISClib.ADT import minpq as mq
 from DISClib.DataStructures import listiterator as it
 from DISClib.Algorithms.Graphs import scc
 from DISClib.Algorithms.Graphs import bfs
 from DISClib.Algorithms.Graphs import dfo
 from DISClib.Algorithms.Graphs import dijsktra as djk
 from DISClib.Utils import error as error
+from math import radians, cos, sin, asin, sqrt 
 assert config
 
 """
@@ -62,6 +64,8 @@ def newAnalyzer():
                     'stops': None,
                     'connections': None,
                     'components': None,
+                    'paths': None,
+                    'location':None
                     'stations':None,
                     'births':None
                     }
@@ -83,6 +87,9 @@ def newAnalyzer():
                                     loadfactor= 0.5,
                                     comparefunction= compareStopIds)
 
+        analyzer['location'] = m.newMap(numelements=14000,
+                                     maptype='PROBING',
+                                     comparefunction=compareStopIds)
 
         return analyzer
     except Exception as exp:
@@ -194,9 +201,23 @@ def addConnection(citibike, origin, destination, duration):
             duration = repetitions_destination[0]/repetitions_destination[1]
             ed.setWeight(edge, duration)
     return citibike
+  
+def addlocation(analyzer, trip):
+    """
+    Agrega a una estacion, su posición en latitud y longitud
+    """
+    entry1 = m.get(analyzer['location'], trip['end station id'])
+    entry2 =  m.get(analyzer['location'], trip['start station id'])
+    if entry1 is None:
+        m.put(analyzer['location'], trip["end station id"], (float(trip["end station latitude"]),float(trip["end station longitude"])))
+    if entry2 is None:
+        m.put(analyzer['location'], trip["start station id"], (float(trip["start station latitude"]),float(trip["start station longitude"])))
+    return analyzer
+
 
 def addComponents(citibike):
     citibike['components'] = scc.KosarajuSCC(citibike['connections'])
+
 # ==============================
 # Funciones de consulta
 # ==============================
@@ -347,6 +368,88 @@ def servedRoutes(analyzer):
             maxdeg = degree
     return maxvert, maxdeg
 
+def criticalStations(analyzer):
+    vertexs = gr.vertices(analyzer["connections"])
+    indegree = mq.newMinPQ(compareinverted)
+    outdegree = mq.newMinPQ(compareinverted)
+    degree = mq.newMinPQ(comparenormal)
+    iterator = it.newIterator(vertexs)
+    res1 = lt.newList()
+    res2 = lt.newList()
+    res3 = lt.newList()
+    while it.hasNext(iterator):
+        element = it.next(iterator)
+        ins = (element,int(gr.indegree(analyzer["connections"],element)))
+        out = (element,int(gr.outdegree(analyzer["connections"],element)))
+        deg = (element,int(gr.indegree(analyzer["connections"],element))+int(gr.outdegree(analyzer["connections"],element)))
+        mq.insert(indegree,ins)
+        mq.insert(outdegree,out)
+        mq.insert(degree,deg)
+
+    for a in range(1,4):
+        lt.addLast(res1,mq.delMin(indegree))
+        lt.addLast(res2,mq.delMin(outdegree))
+        lt.addLast(res3,mq.delMin(degree)) 
+        
+    return (res1,res2,res3)
+
+def distance(lat1, lat2, lon1, lon2):
+    if type(lat1) == float and type(lon1) == float:
+        lon1 = radians(lon1) 
+        lon2 = radians(lon2) 
+        lat1 = radians(lat1) 
+        lat2 = radians(lat2)    
+        dlon = lon2 - lon1  
+        dlat = lat2 - lat1 
+        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+        c = 2 * asin(sqrt(a))   
+        r = 6371
+        return round((c * r),3)
+    else:
+        return "a" 
+
+def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
+    vertexs = gr.vertices(analyzer["connections"])
+    print(vertexs)
+    iterator = it.newIterator(vertexs)
+    sal = ()
+    lleg = ()
+    while it.hasNext(iterator):
+        element = it.next(iterator)
+        locationp = m.get(analyzer["location"],element)
+        location = me.getValue(locationp)
+
+        distance1 = distance(latIn,location[0],lonIn,location[1])
+        distance2 = distance(latFn,location[0],lonFn,location[1])
+        
+        try: 
+            if sal == ():
+                sal = (element,distance1)
+            elif distance1 < sal[1] or (distance1<=sal[1] and gr.outdegree(analyzer["connections"],element)>gr.outdegree(analyzer["connections"],sal[1])):
+                print(distance1, "<", sal[1])
+                print("Numero de salidas",gr.outdegree(analyzer["connections"],element))
+                sal = (element,distance1)   
+        except:
+            pass
+
+        try:  
+            if lleg == ():
+                lleg = (element,distance2)
+            elif distance2 < lleg[1] or (distance2<=lleg[1] and gr.indegree(analyzer["connections"],element)>gr.indegree(analyzer["connections"],lleg[1])):
+                print(distance2, "<", lleg[1])
+                print("Numero de llegadas",gr.indegree(analyzer["connections"],element))
+                lleg = (element,distance2)   
+        except:
+            pass
+
+    analyzer = minimumCostPaths(analyzer,sal[0])
+    minpath = minimumCostPath(analyzer,lleg[0])
+    time = djk.distTo(analyzer["paths"],lleg[0])
+
+    return (sal[0],lleg[0],minpath,time)
+
+
+
 
 # ==============================
 # Funciones Helper
@@ -411,4 +514,24 @@ def compareroutes(route1, route2):
         return 1
     else:
         return -1
+
+def comparenormal(tup1, tup2):
+    num1 = tup1[1]
+    num2 = tup2[1]
+    if (num1 == num2):
+        return 0
+    elif (num1 > num2):
+        return 1
+    else:
+        return -1
+        
+def compareinverted(tup1, tup2):
+    num1 = tup1[1]
+    num2 = tup2[1]
+    if (num1 == num2):
+        return 0
+    elif (num1 > num2):
+        return -1
+    else:
+        return 1
         
