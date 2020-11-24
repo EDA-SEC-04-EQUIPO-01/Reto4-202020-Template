@@ -465,8 +465,6 @@ def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
             if sal == ():
                 sal = (element,distance1)
             elif distance1 < sal[1] or (distance1<=sal[1] and gr.outdegree(analyzer["connections"],element)>gr.outdegree(analyzer["connections"],sal[1])):
-                print(distance1, "<", sal[1])
-                print("Numero de salidas",gr.outdegree(analyzer["connections"],element))
                 sal = (element,distance1)   
         except:
             pass
@@ -475,8 +473,6 @@ def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
             if lleg == ():
                 lleg = (element,distance2)
             elif distance2 < lleg[1] or (distance2<=lleg[1] and gr.indegree(analyzer["connections"],element)>gr.indegree(analyzer["connections"],lleg[1])):
-                print(distance2, "<", lleg[1])
-                print("Numero de llegadas",gr.indegree(analyzer["connections"],element))
                 lleg = (element,distance2)   
         except:
             pass
