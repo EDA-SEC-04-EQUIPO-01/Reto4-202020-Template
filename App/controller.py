@@ -139,8 +139,12 @@ def servedRoutes(analyzer):
     """
     maxvert, maxdeg = model.servedRoutes(analyzer)
     return maxvert, maxdeg
-    
 
 def routeByResistance(citibike,initialStation,resistanceTime):
     return model.routeByResistance(citibike,initialStation,resistanceTime)
 
+def stationsForPublicity(citibike, ageRange):
+    return model.stationsForPublicity(citibike,ageRange)
+
+def bikesForMaintenance(citibike, bikeId, date):
+    return model.bikesForMaintenance(citibike,bikeId,date)

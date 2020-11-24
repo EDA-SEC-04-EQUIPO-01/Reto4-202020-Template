@@ -33,6 +33,7 @@ from DISClib.ADT import list as lt
 from DISClib.DataStructures import listiterator as it
 import timeit
 assert config
+import datetime
 
 """
 La vista se encarga de la interacción con el usuario.
@@ -64,12 +65,14 @@ def printMenu():
     print("6- Ver rutas según un punto de inicio y un tiempo limite: ")
     print("7- Estación que sirve a mas rutas: ")
     print("8- Ruta turística más eficiente: ")
+    print("9- Identificación de estaciones para publicidad según rango de edad:")
+    print("10- Identificación de bicicletas para mantenimiento:")
     print("0- Salir")
     print("*******************************************")
 
 
 def optionTwo():
-    print("\nCargando información de transporte de New York ....")
+    print("\nCargando información de rutas de citibike ....")
 
     controller.loadTrips(cont)
 
@@ -127,7 +130,7 @@ def optionFive():
     
 def optionSix():
     path = controller.routeByResistance(cont, initialStation, resistanceTime)
-    """if stack.isEmpty(path) is False:
+    if stack.isEmpty(path) is False:
         for i in range(0, stack.size(path)):
             print("\nRuta", i+1)
             sub_pila = stack.pop(path)
@@ -136,7 +139,7 @@ def optionSix():
                 print("Segmento",j+1)
                 print("Entre",edge["vertexA"],"y",edge["vertexB"],"te demoras",edge["weight"],"minutos")
     else:
-        print("No hay ninguna ruta para ese tiempo estipulado")"""
+        print("No hay ninguna ruta para ese tiempo estipulado")
 
 
 
@@ -154,7 +157,6 @@ def optionSeven():   #N
     else:
         print("No ingresaste un rango valido, revisa las opciones de nuevo.")
 
-
 def optionEight():
     try:
         lat1 = float(input("Inserte la latitud de salida: "))
@@ -170,6 +172,21 @@ def optionEight():
             print("No existe una ruta entre estas dos estaciones.")
     except:
         print("Ingrese valores válidos")
+
+def optionNine():
+    bestRoute = controller.stationsForPublicity(cont, ageRange)
+    if bestRoute is None:
+        print("No hay mejor ruta para ese rango de edad")
+    else:
+        print("La mejor ruta es", bestRoute[1], "pues", bestRoute[0],"personas de ese rango de edad la utilizan.")
+
+def optionTen():
+    info = controller.bikesForMaintenance(cont, bikeId, date)
+    if info is None:
+        print("No hay mejor ruta para ese rango de edad")
+    else:
+        print("Hubo", info[0], "rutas esa fecha. Además, la bicicleta anduvo", info[1]," minutos detenida y", info[2], "moviendose.")
+
 """
 Menu principal
 """
@@ -177,7 +194,7 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n>')
 
-    if int(inputs[0]) == 1:
+    if int(inputs) == 1:
         print("\nInicializando....")
         # cont es el controlador que se usará de acá en adelante
         cont = controller.init()
@@ -215,10 +232,22 @@ while True:
         anios = input("Ingresa tu rango de edad: ")
         executiontime = timeit.timeit(optionSeven, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
-
+        
     elif int(inputs[0]) == 8:
         executiontime = timeit.timeit(optionEight, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
+
+    elif int(inputs[0]) == 9:
+        ageRange = input("Introduce tu rango de edad: ")
+        executiontime = timeit.timeit(optionNine, number=1)
+        print("Tiempo de ejecución: " + str(executiontime))
+    
+    elif int(inputs) == 10:
+        bikeId = input("Introduce el id de la bicicleta: ")
+        date = input("Introduce la fecha que quieres consultar en formato DD-MM-AAAA: ")
+        date = (datetime.datetime.strptime(date, '%d-%m-%Y')).date()
+        executiontime = timeit.timeit(optionTen, number=1)
+    
 
     else:
         sys.exit(0)
