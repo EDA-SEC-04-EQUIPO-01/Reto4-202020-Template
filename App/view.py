@@ -29,8 +29,11 @@ import sys
 import config
 from App import controller
 from DISClib.ADT import stack
+from DISClib.ADT import list as lt
+from DISClib.DataStructures import listiterator as it
 import timeit
 assert config
+import datetime
 
 """
 La vista se encarga de la interacción con el usuario.
@@ -58,24 +61,27 @@ def printMenu():
     print("2- Cargar información de rutas de citibike")
     print("3- Calcular la cantidad de clusters de viajes")
     print("4- Ruta turistica circular")
-    print("5- Hay camino entre estacion base y estación: ")
+    print("5- Conocer estaciones más concurridas y la menos concurridas: ")
     print("6- Ver rutas según un punto de inicio y un tiempo limite: ")
-    print("7- Recomendador de rutas")
+    print("7- Estación que sirve a mas rutas: ")
+    print("8- Ruta turística más eficiente: ")
+    print("9- Identificación de estaciones para publicidad según rango de edad:")
+    print("10- Identificación de bicicletas para mantenimiento:")
     print("0- Salir")
     print("*******************************************")
 
 
 def optionTwo():
-    print("\nCargando información de transporte de New York ....")
+    print("\nCargando información de rutas de citibike ....")
 
     controller.loadTrips(cont)
 
     numedges = controller.totalConnections(cont)
     numvertex = controller.totalStops(cont)
-    numtrips = controller.totalTrips(cont)
+    #numtrips = controller.totalTrips(cont)
     print('Numero de vertices: ' + str(numvertex))
     print('Numero de arcos: ' + str(numedges))
-    print('Numero de viajes: ' + str(numtrips))
+    #print('Numero de viajes: ' + str(numtrips))
     print('El limite de recursion actual: ' + str(sys.getrecursionlimit()))
     sys.setrecursionlimit(recursionLimit)
     print('El limite de recursion se ajusta a: ' + str(recursionLimit))
@@ -111,15 +117,29 @@ def optionFour():  #N
 
 
 def optionFive():
-    haspath = controller.hasPath(cont, destStation)
-    print('Hay camino entre la estación base : ' +
-          'y la estación: ' + destStation + ': ')
-    print(haspath)
+    critical = controller.criticalStations(cont)
+    print("\nLas estaciones Top de llegada son: \n")
+    iterator = it.newIterator(critical[0])
+    while it.hasNext(iterator):
+        a = it.next(iterator)
+        print("Estación {0} con {1} llegadas.".format(a[0],a[1]))
+    
+    print("\nLas estaciones Top de salida son: \n")
+    iterator = it.newIterator(critical[1])
+    while it.hasNext(iterator):
+        a = it.next(iterator)
+        print("Estación {0} con {1} salidas.".format(a[0],a[1]))
 
+    print("\nLas estaciones menos concurridas son: \n")
+    iterator = it.newIterator(critical[2])
+    while it.hasNext(iterator):
+        a = it.next(iterator)
+        print("Estación {0} con {1} llegadas y salidas.".format(a[0],a[1]))
 
+    
 def optionSix():
     path = controller.routeByResistance(cont, initialStation, resistanceTime)
-    """if stack.isEmpty(path) is False:
+    if stack.isEmpty(path) is False:
         for i in range(0, stack.size(path)):
             print("\nRuta", i+1)
             sub_pila = stack.pop(path)
@@ -128,7 +148,7 @@ def optionSix():
                 print("Segmento",j+1)
                 print("Entre",edge["vertexA"],"y",edge["vertexB"],"te demoras",edge["weight"],"minutos")
     else:
-        print("No hay ninguna ruta para ese tiempo estipulado")"""
+        print("No hay ninguna ruta para ese tiempo estipulado")
 
 
 
@@ -144,7 +164,35 @@ def optionSeven():   #N
     else:
         print("No ingresaste un rango valido, revisa las opciones de nuevo.")
 
+def optionEight():
+    try:
+        lat1 = float(input("Inserte la latitud de salida: "))
+        lon1 = float(input("Inserte la longitud de salida: "))
+        lat2 = float(input("Inserte la latitud de llegada: "))
+        lon2 = float(input("Inserte la longitud de llegada: "))
+        res = controller.touristicRoute(lat1,lon1,lat2,lon2,cont)
+        print("La estación más cercana a la posición {0}, {1} (salida) es: {2}".format(lat1,lon1,res[0]))
+        print("La estación más cercana a la posición {0}, {1} (llegada) es: {2}".format(lat2,lon2,res[1]))
+        if res[2] != None:
+            print("La ruta más corta desde la estación {0} hasta la estación {1} es {2}.\nEsta ruta tiene una duración de {3}.".format(res[0],res[1],res[2],res[3]))
+        else:
+            print("No existe una ruta entre estas dos estaciones.")
+    except:
+        print("Ingrese valores válidos")
 
+def optionNine():
+    bestRoute = controller.stationsForPublicity(cont, ageRange)
+    if bestRoute is None:
+        print("No hay mejor ruta para ese rango de edad")
+    else:
+        print("La mejor ruta es", bestRoute[1], "pues", bestRoute[0],"personas de ese rango de edad la utilizan.")
+
+def optionTen():
+    info = controller.bikesForMaintenance(cont, bikeId, date)
+    if info is None:
+        print("No hay mejor ruta para ese rango de edad")
+    else:
+        print("Hubo", info[0], "rutas esa fecha. Además, la bicicleta anduvo", info[1]," minutos detenida y", info[2], "moviendose.")
 
 """
 Menu principal
@@ -153,7 +201,7 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n>')
 
-    if int(inputs[0]) == 1:
+    if int(inputs) == 1:
         print("\nInicializando....")
         # cont es el controlador que se usará de acá en adelante
         cont = controller.init()
@@ -176,7 +224,6 @@ while True:
         print("Tiempo de ejecución: " + str(executiontime))
 
     elif int(inputs[0]) == 5:
-        destStation = input("Estación destino (Ej: 15151-10): ")
         executiontime = timeit.timeit(optionFive, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
@@ -192,6 +239,22 @@ while True:
         anios = input("Ingresa tu rango de edad: ")
         executiontime = timeit.timeit(optionSeven, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
+        
+    elif int(inputs[0]) == 8:
+        executiontime = timeit.timeit(optionEight, number=1)
+        print("Tiempo de ejecución: " + str(executiontime))
+
+    elif int(inputs[0]) == 9:
+        ageRange = input("Introduce tu rango de edad: ")
+        executiontime = timeit.timeit(optionNine, number=1)
+        print("Tiempo de ejecución: " + str(executiontime))
+    
+    elif int(inputs) == 10:
+        bikeId = input("Introduce el id de la bicicleta: ")
+        date = input("Introduce la fecha que quieres consultar en formato DD-MM-AAAA: ")
+        date = (datetime.datetime.strptime(date, '%d-%m-%Y')).date()
+        executiontime = timeit.timeit(optionTen, number=1)
+    
 
     else:
         sys.exit(0)

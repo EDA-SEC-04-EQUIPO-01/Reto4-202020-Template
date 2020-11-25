@@ -65,13 +65,13 @@ def loadTrips(citibike):
     return citibike
 
 def loadFile(citibike, tripfile):
-    """
-    """
+
     tripfile = cf.data_dir + tripfile
     input_file = csv.DictReader(open(tripfile, encoding="utf-8"),
                                 delimiter=",")
     for trip in input_file:
         model.addTrip(citibike, trip)
+        model.addlocation(citibike,trip)
     return citibike
 
 
@@ -100,6 +100,11 @@ def totalTrips(analyzer):
     """
     return model.totalTrips(analyzer)
 
+def criticalStations(analyzer):
+    return model.criticalStations(analyzer)
+
+def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
+    return model.touristicRoute(latIn, lonIn, latFn, lonFn, analyzer)
 
 
 def clusteredStations(analyzer, id1, id2):
@@ -134,7 +139,6 @@ def servedRoutes(analyzer):
     """
     maxvert, maxdeg = model.servedRoutes(analyzer)
     return maxvert, maxdeg
-    
 
 def routeByResistance(citibike,initialStation,resistanceTime):
     return model.routeByResistance(citibike,initialStation,resistanceTime)
@@ -173,3 +177,10 @@ def mejorCamino(cont, estacion_inicio, estacion_final):
 
 def ciclosEnRango(listaCiclos, tiempo_min, tiempo_max):
     return model.ciclosEnRango(listaCiclos, tiempo_min, tiempo_max)
+
+def stationsForPublicity(citibike, ageRange):
+    return model.stationsForPublicity(citibike,ageRange)
+
+def bikesForMaintenance(citibike, bikeId, date):
+    return model.bikesForMaintenance(citibike,bikeId,date)
+
