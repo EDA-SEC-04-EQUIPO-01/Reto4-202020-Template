@@ -161,6 +161,8 @@ def recorrer_rangos(cont, rango):
 def buscarInicio(citibike, fecha1, fecha2):
     return model.buscarInicio(citibike, fecha1, fecha2)
 
+def validarID(initialStation,cont):
+    return model.validarID(initialStation, cont)
 
 def buscarFinal(citibike, fecha1, fecha2):
     return model.buscarFinal(citibike, fecha1, fecha2)

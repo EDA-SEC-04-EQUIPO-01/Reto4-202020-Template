@@ -414,31 +414,40 @@ def compareroutes(route1, route2):
     else:
         return -1
         
+def validarID(initialStation,cont):
+    if initialStation in cont["stations"]:
+        return True
+    else:
+        return False
+
 def estaciones_por_rango(cont, rango):
     camino_mostrar=[]
     buscar_rango_hash=m.get(cont["births"],rango)
-    variable1= me.getValue(buscar_rango_hash)
-    variable2 =m.get(variable1, "Intro")
-    variable3 = me.getValue(variable2)
-    variable4 = m.get(variable3, "Max")
-    variablesIntro = me.getValue(variable4)
-    variable5 =m.get(variable1, "Outro")
-    variable6 = me.getValue(variable5)
-    variable7 = m.get(variable6, "Max")
-    variablesOutro = me.getValue(variable7)
-    if variablesIntro[1] != variablesOutro[1]:
-        cont = minimumCostPaths(cont,variablesIntro[1])
-        camino = minimumCostPath(cont,variablesOutro[1])
-        tiempo = djk.distTo(cont["paths"],variablesOutro[1])
-        iterator = it.newIterator(camino)
-        while it.hasNext(iterator):
-            element=it.next(iterator)
-            camino_mostrar.append(element)
+    if buscar_rango_hash == None:
+        tupla = (0,0,0,0,0,0)
     else:
-        camino="NINGUNO porque la estacion " +str(variablesIntro[1]) +" es la que mas viajes recibe y más arroja"
-        tiempo=0
+        variable1= me.getValue(buscar_rango_hash)
+        variable2 =m.get(variable1, "Intro")
+        variable3 = me.getValue(variable2)
+        variable4 = m.get(variable3, "Max")
+        variablesIntro = me.getValue(variable4)
+        variable5 =m.get(variable1, "Outro")
+        variable6 = me.getValue(variable5)
+        variable7 = m.get(variable6, "Max")
+        variablesOutro = me.getValue(variable7)
+        if variablesIntro[1] != variablesOutro[1]:
+            cont = minimumCostPaths(cont,variablesIntro[1])
+            camino = minimumCostPath(cont,variablesOutro[1])
+            tiempo = djk.distTo(cont["paths"],variablesOutro[1])
+            iterator = it.newIterator(camino)
+            while it.hasNext(iterator):
+                element=it.next(iterator)
+                camino_mostrar.append(element)
+        else:
+            camino="NINGUNO porque la estacion " +str(variablesIntro[1]) +" es la que mas viajes recibe y más arroja"
+            tiempo=0
 
-    tupla =(variablesIntro[1],variablesIntro[0],variablesOutro[1],variablesOutro[0],camino_mostrar,round(tiempo,2))
+        tupla =(variablesIntro[1],variablesIntro[0],variablesOutro[1],variablesOutro[0],camino_mostrar,round(tiempo,2))
     return tupla
 
 def hayarEstaciones(cont, initialStation):
@@ -480,7 +489,7 @@ def hayarMinCiclos(cont, initialStation, estaciones):
             lista.append(element)
             tiempo_visita+=20
         tiempo_total= tiempo1+tiempo2+tiempo_visita
-        tupla=(lista,tiempo_total)
+        tupla=(lista,round(tiempo_total),2)
         respuesta.append(tupla) 
     return respuesta
 
@@ -489,6 +498,6 @@ def ciclosEnRango(listaCiclos, tiempo1, tiempo2):
     for a in range(0,len(listaCiclos)):
         unCiclo = listaCiclos[a]
         if (tiempo1 < int(unCiclo[1]) and ( int(unCiclo[1]) < tiempo2)):
-            crear= str(unCiclo[0]) +" Es un ciclo que tarda " +str(unCiclo[1]) +" minutos, contando que puedas disfrutar de cada estacion 20 minutos!"
+            crear= str(unCiclo[0]) +" Es un ciclo que tarda " +str(round(unCiclo[1],2)) +" minutos, contando que puedas disfrutar de cada estacion 20 minutos!"
             lista.append(crear)
     return lista

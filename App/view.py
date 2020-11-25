@@ -95,16 +95,19 @@ def optionThree():
 def optionFour():  #N
     tiempo_min=int(input("Ingresa el tiempo minimo  para hacer una ruta: "))
     tiempo_max=int(input("Ingresa el tiempo maximo para hacer una ruta: "))
-    # controller.minimumCostPaths(cont, initialStation)
-    salidas= controller.hayarEstaciones(cont, initialStation)
-    ciclos_existen= controller.comprobarCamino(cont, initialStation, salidas)
-    if ciclos_existen != "NO EXISTEN":
-        listaCiclos = controller.hayarMinCiclos(cont, initialStation, ciclos_existen)
-        ciclosEnRango = controller.ciclosEnRango(listaCiclos, tiempo_min, tiempo_max)
-        for x in range(0,len(ciclosEnRango)):
-            print("\n",ciclosEnRango[x])
+    validarID = controller.validarID(initialStation, cont)
+    if validarID:
+        salidas= controller.hayarEstaciones(cont, initialStation)
+        ciclos_existen= controller.comprobarCamino(cont, initialStation, salidas)
+        if ciclos_existen != "NO EXISTEN":
+            listaCiclos = controller.hayarMinCiclos(cont, initialStation, ciclos_existen)
+            ciclosEnRango = controller.ciclosEnRango(listaCiclos, tiempo_min, tiempo_max)
+            for x in range(0,len(ciclosEnRango)):
+                print("\n",ciclosEnRango[x])
+        else:
+            print("La estacion no tiene rutas hasta ella misima")
     else:
-        print("La estacion no tiene rutas hasta ella misima")
+        print("El ID de la estacion no se encuentra en el archivo cargado")
 
 
 def optionFive():
@@ -130,11 +133,14 @@ def optionSix():
 
 
 def optionSeven():   #N
-    validar= controller.validar(anios)
+    validar= controller.validar(anios) #Validar que escribio bien el rango
     if validar:
         recorrer= controller.recorrer_rangos(cont, anios)
-        print("\nSegun tu edad, la mayoria de rutas sale de",recorrer[0],"con un total de",recorrer[1],"rutas.\nSegun tu edad la estacion que recibe mas rutas se llama",
-        recorrer[2],"con un total de",recorrer[3],"rutas.\n\nEl camino más corto entre estas es",recorrer[4],".\nTe demorarias entre estas un total de",recorrer[5],"minutos.")
+        if (recorrer[0]==0) and (recorrer[1]==0) and(recorrer[2]==0) and(recorrer[3]==0) and(recorrer[4]==0) and(recorrer[5]==0): #valida viajes en el rango
+            print("\nNo hay viajes realizados en este rango de fechas.")
+        else:
+            print("\nSegun tu edad, la mayoria de rutas sale de",recorrer[0],"con un total de",recorrer[1],"rutas.\nSegun tu edad la estacion que recibe mas rutas se llama",
+            recorrer[2],"con un total de",recorrer[3],"rutas.\n\nEl camino más corto entre estas es",recorrer[4],".\nTe demorarias entre estas un total de",recorrer[5],"minutos.")
     else:
         print("No ingresaste un rango valido, revisa las opciones de nuevo.")
 
@@ -164,7 +170,7 @@ while True:
 
     #N
     elif int(inputs[0]) == 4:      
-        msg = "Estación Base: BusStopCode-ServiceNo (Ej: 75009-10): "
+        msg = "Ingresa el ID de al estacion base (Ej: 144, 146): "
         initialStation = input(msg)
         executiontime = timeit.timeit(optionFour, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
