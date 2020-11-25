@@ -57,10 +57,10 @@ def printMenu():
     print("1- Inicializar Analizador")
     print("2- Cargar información de rutas de citibike")
     print("3- Calcular la cantidad de clusters de viajes")
-    print("4- Establecer estación base:")
+    print("4- Ruta turistica circular")
     print("5- Hay camino entre estacion base y estación: ")
     print("6- Ver rutas según un punto de inicio y un tiempo limite: ")
-    print("7- Estación que sirve a mas rutas: ")
+    print("7- Recomendador de rutas")
     print("0- Salir")
     print("*******************************************")
 
@@ -93,12 +93,18 @@ def optionThree():
 
 
 def optionFour():  #N
-    rango_min=int(input("Ingresa el tiempo minimo  para hacer una ruta: "))
-    rango_max=int(input("Ingresa el tiempo maximo para hacer una ruta: "))
+    tiempo_min=int(input("Ingresa el tiempo minimo  para hacer una ruta: "))
+    tiempo_max=int(input("Ingresa el tiempo maximo para hacer una ruta: "))
     # controller.minimumCostPaths(cont, initialStation)
-    respuesta = controller.recorrer_dfo(cont, initialStation)
-    print("la respuesta es: ", respuesta)
-    # rango_min, rango_max
+    salidas= controller.hayarEstaciones(cont, initialStation)
+    ciclos_existen= controller.comprobarCamino(cont, initialStation, salidas)
+    if ciclos_existen != "NO EXISTEN":
+        listaCiclos = controller.hayarMinCiclos(cont, initialStation, ciclos_existen)
+        ciclosEnRango = controller.ciclosEnRango(listaCiclos, tiempo_min, tiempo_max)
+        for x in range(0,len(ciclosEnRango)):
+            print("\n",ciclosEnRango[x])
+    else:
+        print("La estacion no tiene rutas hasta ella misima")
 
 
 def optionFive():
@@ -124,16 +130,11 @@ def optionSix():
 
 
 def optionSeven():   #N
-    validacion = controller.rango_edad(anios)
-    if validacion[0]:
-        print(validacion[1], "hasta ", validacion[2])
-        #tupla con valor 0 el nombre de la parada y 1 la cantidad
-        inicio = controller.buscarInicio(cont, validacion[1], validacion[2])
-        print(inicio)
-        final = controller.buscarFinal(cont, validacion[1], validacion[2])
-        print(final)
-        camino = 0 #usar min cost path
-        print(camino)
+    validar= controller.validar(anios)
+    if validar:
+        recorrer= controller.recorrer_rangos(cont, anios)
+        print("\nSegun tu edad, la mayoria de rutas sale de",recorrer[0],"con un total de",recorrer[1],"rutas.\nSegun tu edad la estacion que recibe mas rutas se llama",
+        recorrer[2],"con un total de",recorrer[3],"rutas.\n\nEl camino más corto entre estas es",recorrer[4],".\nTe demorarias entre estas un total de",recorrer[5],"minutos.")
     else:
         print("No ingresaste un rango valido, revisa las opciones de nuevo.")
 
@@ -164,7 +165,7 @@ while True:
     #N
     elif int(inputs[0]) == 4:      
         msg = "Estación Base: BusStopCode-ServiceNo (Ej: 75009-10): "
-        iStation = input(msg)
+        initialStation = input(msg)
         executiontime = timeit.timeit(optionFour, number=1)
         print("Tiempo de ejecución: " + str(executiontime))
 
