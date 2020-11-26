@@ -450,7 +450,6 @@ def distance(lat1, lat2, lon1, lon2):
 
 def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
     vertexs = gr.vertices(analyzer["connections"])
-    print(vertexs)
     iterator = it.newIterator(vertexs)
     sal = ()
     lleg = ()
