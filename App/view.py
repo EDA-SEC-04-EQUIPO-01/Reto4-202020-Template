@@ -146,7 +146,7 @@ def optionSix():
             for j in range(0, stack.size(sub_pila)):
                 edge = stack.pop(sub_pila)
                 print("Segmento",j+1)
-                print("Entre",edge["vertexA"],"y",edge["vertexB"],"te demoras",edge["weight"],"minutos")
+                print("Entre",edge["vertexA"],"y",edge["vertexB"],"te demoras",float(edge["weight"])/60,"minutos")
     else:
         print("No hay ninguna ruta para ese tiempo estipulado")
 
