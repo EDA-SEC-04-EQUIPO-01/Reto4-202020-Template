@@ -99,10 +99,9 @@ def optionThree():
 
 
 def optionFour():  #N
-    tiempo_min=int(input("Ingresa el tiempo minimo  para hacer una ruta: "))
+    tiempo_min=int(input("Ingresa el tiempo minimo para hacer una ruta: "))
     tiempo_max=int(input("Ingresa el tiempo maximo para hacer una ruta: "))
-    validarID = controller.validarID(initialStation, cont)
-    if validarID:
+    try:
         salidas= controller.hayarEstaciones(cont, initialStation)
         ciclos_existen= controller.comprobarCamino(cont, initialStation, salidas)
         if ciclos_existen != "NO EXISTEN":
@@ -112,8 +111,9 @@ def optionFour():  #N
                 print("\n",ciclosEnRango[x])
         else:
             print("La estacion no tiene rutas hasta ella misima")
-    else:
-        print("El ID de la estacion no se encuentra en el archivo cargado")
+            
+    except:
+        print("El ID de la estacion no se encuentra en el csv")
 
 
 def optionFive():
@@ -218,7 +218,7 @@ while True:
 
     #N
     elif int(inputs[0]) == 4:      
-        msg = "Ingresa el ID de al estacion base (Ej: 144, 146): "
+        msg = "Ingresa el ID de al estacion base (Ej: 83, 146): "
         initialStation = input(msg)
         executiontime = timeit.timeit(optionFour, number=1)
         print("Tiempo de ejecución: " + str(executiontime))

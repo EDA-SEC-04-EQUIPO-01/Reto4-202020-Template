@@ -484,13 +484,6 @@ def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
 
     return (sal[0],lleg[0],minpath,time)
 
-
-def validarID(initialStation,cont):
-    if initialStation in cont["stations"]:
-        return True
-    else:
-        return False
-
 def estaciones_por_rango(cont, rango):
     camino_mostrar=[]
     buscar_rango_hash=m.get(cont["births"],rango)
