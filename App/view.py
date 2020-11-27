@@ -114,16 +114,19 @@ def optionFive():
 
 def optionSix():
     path = controller.routeByResistance(cont, initialStation, resistanceTime)
-    if stack.isEmpty(path) is False:
-        for i in range(0, stack.size(path)):
-            print("\nRuta", i+1)
-            sub_pila = stack.pop(path)
-            for j in range(0, stack.size(sub_pila)):
-                edge = stack.pop(sub_pila)
-                print("Segmento",j+1)
-                print("Entre",edge["vertexA"],"y",edge["vertexB"],"te demoras",edge["weight"],"minutos")
+    if path is None:
+        print("La ruta que introdujiste no existe.")
     else:
-        print("No hay ninguna ruta para ese tiempo estipulado")
+        if stack.isEmpty(path) is False:
+            for i in range(0, stack.size(path)):
+                print("\nRuta", i+1)
+                sub_pila = stack.pop(path)
+                for j in range(0, stack.size(sub_pila)):
+                    edge = stack.pop(sub_pila)
+                    print("Segmento",j+1)
+                    print("Entre",edge["vertexA"],"y",edge["vertexB"],"te demoras",float(edge["weight"])/60,"minutos")
+        else:
+            print("No hay ninguna ruta para ese tiempo estipulado")
 
 
 

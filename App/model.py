@@ -278,37 +278,40 @@ def getElement(entry):
         return None
 
 def routeByResistance(citibike, initialStation, resistanceTime):
-    dijsktra = djk.Dijkstra(citibike["connections"], initialStation)
-    resistanceTime = resistanceTime*60
-    vertices = gr.vertices(citibike["connections"])
-    iterator = it.newIterator(vertices)
-    trueStations = st.newStack()
-    stops = m.newMap(numelements=768,
-                    maptype="CHAINING",
-                    loadfactor=1,
-                    comparefunction=compareStopIds)
-    while it.hasNext(iterator):
-        element = it.next(iterator)
-        if element != initialStation and djk.hasPathTo(dijsktra, element) is True:
-            if m.get(stops, element) is None or getElement(m.get(stops, element))["value"] is False:
-                if djk.distTo(dijsktra,element) <= resistanceTime:
-                    pila= djk.pathTo(dijsktra,element)
-                    pila2 = djk.pathTo(dijsktra,element)
-                    size_pila = 0
-                    repetition = False
-                    lon_pila = st.size(pila)
-                    watcher = {"value": True}
-                    while size_pila < lon_pila and repetition == False:
-                        pop = st.pop(pila)["vertexB"]
-                        if m.get(stops,pop) is None or getElement(m.get(stops,pop))["value"] is False:
-                            m.put(stops,pop,watcher)
-                        else:
-                            repetition = True
-                            watcher["value"]=False
-                        size_pila +=1
-                    if repetition == False:
-                        st.push(trueStations, pila2)
-    return trueStations
+    try:
+        dijsktra = djk.Dijkstra(citibike["connections"], initialStation)
+        vertices = gr.vertices(citibike["connections"])
+        iterator = it.newIterator(vertices)
+        trueStations = st.newStack()
+        stops = m.newMap(numelements=768,
+                        maptype="CHAINING",
+                        loadfactor=1,
+                        comparefunction=compareStopIds)
+        while it.hasNext(iterator):
+            element = it.next(iterator)
+            if element != initialStation and djk.hasPathTo(dijsktra, element) is True:
+                if m.get(stops, element) is None or getElement(m.get(stops, element))["value"] is False:
+                    if djk.distTo(dijsktra,element) <= resistanceTime:
+                        pila= djk.pathTo(dijsktra,element)
+                        pila2 = djk.pathTo(dijsktra,element)
+                        size_pila = 0
+                        repetition = False
+                        lon_pila = st.size(pila)
+                        watcher = {"value": True}
+                        while size_pila < lon_pila and repetition == False:
+                            pop = st.pop(pila)["vertexB"]
+                            if m.get(stops,pop) is None or getElement(m.get(stops,pop))["value"] is False:
+                                m.put(stops,pop,watcher)
+                            else:
+                                repetition = True
+                                watcher["value"]=False
+                            size_pila +=1
+                        if repetition == False:
+                            st.push(trueStations, pila2)
+        return trueStations
+    except:
+        return None
+    
                     
 def stationsForPublicity(citibike, ageRange):
     costumers = m.get(citibike["births"], ageRange)
@@ -317,6 +320,8 @@ def stationsForPublicity(citibike, ageRange):
         costumers = m.get(me.getValue(costumers), "Max")
         costumers = me.getValue(costumers)
     return costumers
+
+    
 def bikesForMaintenance(citibike, bikeId, date):
     bikeInfo = m.get(citibike["bikes"], bikeId)
     if bikeInfo != None:
