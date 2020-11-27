@@ -23,6 +23,7 @@
  * Dario Correal
  *
  """
+from DISClib.ADT import stack
 import config
 from DISClib.DataStructures import edge as ed
 from DISClib.ADT import stack as st
@@ -454,7 +455,6 @@ def distance(lat1, lat2, lon1, lon2):
 
 def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
     vertexs = gr.vertices(analyzer["connections"])
-    print(vertexs)
     iterator = it.newIterator(vertexs)
     sal = ()
     lleg = ()
@@ -470,8 +470,6 @@ def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
             if sal == ():
                 sal = (element,distance1)
             elif distance1 < sal[1] or (distance1<=sal[1] and gr.outdegree(analyzer["connections"],element)>gr.outdegree(analyzer["connections"],sal[1])):
-                print(distance1, "<", sal[1])
-                print("Numero de salidas",gr.outdegree(analyzer["connections"],element))
                 sal = (element,distance1)   
         except:
             pass
@@ -480,8 +478,6 @@ def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
             if lleg == ():
                 lleg = (element,distance2)
             elif distance2 < lleg[1] or (distance2<=lleg[1] and gr.indegree(analyzer["connections"],element)>gr.indegree(analyzer["connections"],lleg[1])):
-                print(distance2, "<", lleg[1])
-                print("Numero de llegadas",gr.indegree(analyzer["connections"],element))
                 lleg = (element,distance2)   
         except:
             pass
@@ -492,8 +488,86 @@ def touristicRoute(latIn, lonIn, latFn, lonFn, analyzer):
 
     return (sal[0],lleg[0],minpath,time)
 
+def estaciones_por_rango(cont, rango):
+    camino_mostrar=[]
+    buscar_rango_hash=m.get(cont["births"],rango)
+    if buscar_rango_hash == None:
+        tupla = (0,0,0,0,0,0)
+    else:
+        variable1= me.getValue(buscar_rango_hash)
+        variable2 =m.get(variable1, "Intro")
+        variable3 = me.getValue(variable2)
+        variable4 = m.get(variable3, "Max")
+        variablesIntro = me.getValue(variable4)
+        variable5 =m.get(variable1, "Outro")
+        variable6 = me.getValue(variable5)
+        variable7 = m.get(variable6, "Max")
+        variablesOutro = me.getValue(variable7)
+        if variablesIntro[1] != variablesOutro[1]:
+            cont = minimumCostPaths(cont,variablesIntro[1])
+            camino = minimumCostPath(cont,variablesOutro[1])
+            tiempo = djk.distTo(cont["paths"],variablesOutro[1])
+            iterator = it.newIterator(camino)
+            while it.hasNext(iterator):
+                element=it.next(iterator)
+                camino_mostrar.append(element)
+        else:
+            camino="NINGUNO porque la estacion " +str(variablesIntro[1]) +" es la que mas viajes recibe y más arroja"
+            tiempo=0
 
+        tupla =(variablesIntro[1],variablesIntro[0],variablesOutro[1],variablesOutro[0],camino_mostrar,round(tiempo,2))
+    return tupla
 
+def hayarEstaciones(cont, initialStation):
+    informacion = gr.adjacents(cont["connections"], initialStation)
+    lista=[]
+    if stack.isEmpty(informacion) == False:
+        for i in range(0, stack.size(informacion)):
+            sub_pila = stack.pop(informacion)
+            lista.append(sub_pila)
+    return lista
+
+def comprobarCamino(cont, initialStation, salidas):
+    lista=[]
+    for a in range(0,len(salidas)):
+        nuevo_scc= scc.KosarajuSCC(cont["connections"])
+        verdad = scc.stronglyConnected(nuevo_scc, initialStation, salidas[a])
+        if verdad:
+            lista.append(salidas[a])
+    if lista == []:
+        lista = "NO EXISTEN"
+    return lista   
+
+def hayarMinCiclos(cont, initialStation, estaciones):
+    listaCiclos=[]
+    for a in range(0,len(estaciones)):
+        lista=[]
+        cont = minimumCostPaths(cont, initialStation)
+        tiempo1 = djk.distTo(cont["paths"],estaciones[a]) #tiempo de Inicio a V1
+        lista=["Hay un camino que empieza en "+str(initialStation)+" y va a " +str(estaciones[a]) +" en un tiempo de "+str(round(tiempo1))+" segundos que se conecta asi:"]
+        cont = minimumCostPaths(cont, estaciones[a])
+        tiempo2 = djk.distTo(cont["paths"],initialStation)
+        minimumCostPaths(cont, estaciones[a])
+        path2 = minimumCostPath(cont, initialStation)
+        iterator = it.newIterator(path2)
+        tiempo_visita=0
+        while it.hasNext(iterator):
+            element=it.next(iterator)
+            lista.append(element)
+            tiempo_visita+=20
+        tiempo_total= tiempo1/60+tiempo2/60+tiempo_visita
+        tupla=(lista,round(tiempo_total))
+        listaCiclos.append(tupla) 
+    return listaCiclos
+
+def ciclosEnRango(listaCiclos, tiempo1, tiempo2):
+    lista=[]
+    for a in range(0,len(listaCiclos)):
+        unCiclo = listaCiclos[a]
+        if (tiempo1 < int(unCiclo[1]) and ( int(unCiclo[1]) < tiempo2)):
+            crear= str(unCiclo[0]) +" Es un ciclo que tarda " +str(round(unCiclo[1],2)) +" MINUTOS, contando que puedas disfrutar de cada estacion 20 minutos!"
+            lista.append(crear)
+    return lista
 
 
 # ==============================
@@ -535,6 +609,8 @@ def compareroutes(route1, route2):
     else:
         return -1
 
+
+
 def comparenormal(tup1, tup2):
     num1 = tup1[1]
     num2 = tup2[1]
@@ -555,3 +631,4 @@ def compareinverted(tup1, tup2):
     else:
         return 1
         
+

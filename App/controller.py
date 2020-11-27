@@ -143,8 +143,44 @@ def servedRoutes(analyzer):
 def routeByResistance(citibike,initialStation,resistanceTime):
     return model.routeByResistance(citibike,initialStation,resistanceTime)
 
+def validar(anios):
+    if (anios == "0-10") or (anios == "11-20") or (anios == "21-30") or (anios == "31-40") or (anios == "41-50") or (anios == "51-60") or (anios == "60+"):
+        return True
+    else:
+        return False
+
+
+def hayarEstaciones(cont, initialStation):
+    return model.hayarEstaciones(cont, initialStation)
+
+def comprobarCamino(cont, initialStation, salidas):
+    return model.comprobarCamino(cont, initialStation, salidas)
+
+def hayarMinCiclos(cont, initialStation, ciclos_existen):
+    return model.hayarMinCiclos(cont, initialStation, ciclos_existen)
+
+def recorrer_rangos(cont, rango):
+    return model.estaciones_por_rango(cont, rango)
+
+def buscarInicio(citibike, fecha1, fecha2):
+    return model.buscarInicio(citibike, fecha1, fecha2)
+
+def validarID(initialStation,cont):
+    return model.validarID(initialStation, cont)
+
+def buscarFinal(citibike, fecha1, fecha2):
+    return model.buscarFinal(citibike, fecha1, fecha2)
+
+def mejorCamino(cont, estacion_inicio, estacion_final):
+    grafo = minimumCostPaths(cont, estacion_inicio)
+    return minimumCostPath(grafo, estacion_final)
+
+def ciclosEnRango(listaCiclos, tiempo_min, tiempo_max):
+    return model.ciclosEnRango(listaCiclos, tiempo_min, tiempo_max)
+
 def stationsForPublicity(citibike, ageRange):
     return model.stationsForPublicity(citibike,ageRange)
 
 def bikesForMaintenance(citibike, bikeId, date):
     return model.bikesForMaintenance(citibike,bikeId,date)
+
